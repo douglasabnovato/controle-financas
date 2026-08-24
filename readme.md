@@ -427,7 +427,62 @@ Estes itens representam ajustes pontuais mapeados para blindar a API, otimizar a
 ---
 
 
-### Passo a Passo da Fase 2: Desenvolvimento do Backend (API Core e Regras de Negócio)
+### Passo a Passo da Fase 3: Desenvolvimento do Frontend (Interfaces e UX)
+
+Nesta etapa, vamos estruturar a interface de usuário em React com Vite e Tailwind CSS, conectando o ecossistema frontend à nossa API backend.
+
+#### 1. Configuração Inicial e Serviços (`client/src/`)
+* **Estrutura de Pastas e Axios (`src/services/api.js`):**
+  * Criação das pastas organizacionais (`components/`, `pages/`, `services/`).
+  * Configuração da instância do Axios apontando para a API REST do backend (`http://localhost:3000/api`).
+
+#### 2. Tela Inicial de Acesso e Perfil (`src/pages/Home.jsx`)
+* **Cadastro e Segmentação (BUs):**
+  * Formulário de cadastro de usuário (`POST /api/users`) e vinculação de Business Unit / Perfil (`POST /api/profiles`).
+  * Armazenamento local do `active_profile_id` para persistência do contexto de navegação.
+
+#### 3. Componente de Upload de Imagens com Preview (`src/components/ReceiptUpload.jsx`)
+* **Envio e Privacidade:**
+  * Componente de seleção e pré-visualização local (*preview*) da imagem do cupom no dispositivo do usuário.
+  * Envio via `multipart/form-data` para o endpoint de processamento inteligente por IA (`POST /api/receipts/process`).
+
+#### 4. Catálogo Geral e Progressive Disclosure (`src/pages/ReceiptsList.jsx`)
+* **Listagem e Auditoria:**
+  * Listagem cronológica dos cupons do perfil ativo consumindo `GET /api/receipts`.
+  * Modal interativo (*Progressive Disclosure*) para detalhamento individual dos itens normalizados consumindo `GET /api/receipts/:id`.
+
+#### 5. Módulo Dashboard e KPIs Financeiros (`src/components/DashboardSummary.jsx`)
+* **Inteligência Analítica:**
+  * Cartões de resumo com métricas agregadas (total de cupons, valor total gasto e ticket médio).
+  * Ranking dinâmico dos estabelecimentos mais frequentes (*Top Stores*) consumindo `GET /api/receipts/dashboard/summary`.
+
+
+### 📌 Próximos Passos e Melhorias Futuras (Backlog de Evolução)
+
+Estes itens representam os ajustes funcionais, de experiência do usuário (UX) e de dados estruturais mapeados após os testes práticos iniciais do MVP:
+
+1. **Login de Usuário Já Criado:**
+   * **O que fazer:** Implementar um botão de alternância (*toggle*) na tela inicial (`Home.jsx`) para alternar entre o modo de "Cadastro de Novo Usuário" e "Login / Seleção de Perfil Existente". No modo de login, a API deverá buscar os perfis já cadastrados no banco (via endpoint `GET`) e exibi-los em um menu suspenso (*Select*) para que o usuário escolha sua Business Unit (BU) rapidamente sem precisar reinserir os dados cadastrais.
+
+2. **Mensagens Estruturadas (Modais e Alertas Nativos/UI):**
+   * **O que fazer:** Substituir os modais nativos do navegador (`alert()`) por componentes visuais flutuantes e elegantes (como *Toasts* de notificação com Tailwind ou modais customizados de sucesso/erro). Isso trará um acabamento profissional e responsivo à interface do ecossistema learnTECH.
+
+3. **Feedback de Processamento e Trava de Ação (Loading State):**
+   * **O que fazer:** Adicionar estados de carregamento estruturados nos botões de ação (especialmente no upload de imagens e processamento por IA). O botão deverá ser desativado (`disabled`) imediatamente após o clique para evitar múltiplos envios simultâneos, e será exibido um indicador visual de progresso ou percentual de carregamento para gerenciar a expectativa do usuário durante a chamada assíncrona.
+
+4. **Identificador Único Personalizado do Cupom (ID Alfaneumérico):**
+   * **O que fazer:** Evoluir a regra de geração de ID da tabela `receipts` para que o identificador exibido ao usuário combine as **três primeiras letras do nome do cliente** (ou nickname) em maiúsculas com um **número sequencial global** dos cupons cadastrados (ex: `JHO-001`, `JHO-002`). Será necessário ajustar a camada de persistência e a exibição no frontend.
+
+5. **Exibição de Informações Detalhadas do Cupom (Transcrição da Imagem):**
+   * **O que fazer:** Expandir o contrato de dados da tabela `receipts` e a visualização no modal de detalhes (*Progressive Disclosure*) para capturar e exibir todas as métricas fiscais e operacionais presentes no cupom. 
+   * **Análise e Transcrição dos Dados da Imagem:**
+     * **Cabeçalho / Estabelecimento:** `SUPERMERCADO BAHAMAS S/A`, `Loja 019 Mix Ferreira Guimarães`, `Rua Benjamin Guimarães, 315`, `Democrata, Juiz de Fora - MG`, `CNPJ: 17.745.613/0019-60`.
+     * **Dados de Operação e Atendimento:** `Gerente: Filipe Pires`, `Tel: (32) 3249-9413`, `COO: 294404`, `OP: 20469`, `Caixa/Operador: Herick Jorge Athayde Halfeld`, `LJ: 19`, `PDV: 11`.
+     * **Forma de Pagamento:** `Mastercard (Final 6553)`, `AUT: 103928`, `NSU: 011613`, `DOC: 343013202`, `Venda Débito à Vista`, `ARQC: 7FFA8489E620A29E`, `CTR: 08716311013`.
+     * **Totais e Tributos da Compra:** `Qtd. Total de Itens: 24`, `Valor Total: R$ 248,07`, `Desconto: R$ 2,10`, `Acréscimo: R$ 0,00`, `Valor a Pagar: R$ 245,97`, `Volumes: 28`, `Economia na Compra: R$ 2,10`, `Valor Aproximado de Tributos Estaduais: R$ 44,57 (18%) IBPT`.
+
+6. **Tratamento de Conflitos de Extensões e Portas Assíncronas (Console Warnings):**
+   * **O que fazer:** Investigar e mitigar os erros de canal fechado gerados por extensões de navegador (`A listener indicated an asynchronous response by returning true...`). No código da aplicação, garantir que todas as chamadas `async/await` e requisições à API tratem corretamente os timeouts e o ciclo de vida das promessas, isolando o ambiente de desenvolvimento de interferências externas de plugins do browser.
 
 ---
 

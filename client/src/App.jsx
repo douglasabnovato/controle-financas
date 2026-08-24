@@ -1,36 +1,52 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react';
+import Home from './pages/Home';
+import ReceiptUpload from './components/ReceiptUpload';
+import ReceiptsList from './pages/ReceiptsList';
+import DashboardSummary from './components/DashboardSummary';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [profile, setProfile] = useState(null);
+  const [refresh, setRefresh] = useState(false);
+
+  useEffect(() => {
+    const savedProfileId = localStorage.getItem('active_profile_id');
+    if (savedProfileId) {
+      setProfile({ id: savedProfileId });
+    }
+  }, []);
+
+  const handleUploadSuccess = () => {
+    setRefresh(prev => !prev); // Dispara atualização automática nas listas e dashboard
+  };
+
+  if (!profile) {
+    return <Home onLoginSuccess={(prof) => setProfile(prof)} />;
+  }
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col items-center justify-center p-6">
-      <div className="max-w-xl w-full bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700 text-center">
-        <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full border border-purple-500/20">
-          LearnTECH Ecosystem
-        </span>
-        <h1 className="text-3xl font-bold mt-4 mb-2 text-white">
-          Controle Finanças
-        </h1>
-        <p className="text-slate-400 mb-6">
-          Aplicação web inteligente para catalogação e auditoria de despesas.
-        </p>
-
-        <div className="flex flex-col items-center justify-center gap-4">
-          <button
-            type="button"
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-xl transition-all shadow-lg shadow-purple-600/20 cursor-pointer"
-            onClick={() => setCount((count) => count + 1)}
-          >
-            Contador de Teste: {count}
+    <div className="min-h-screen bg-gray-100 p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <header className="flex justify-between items-center bg-white p-6 rounded-xl shadow-md border border-gray-100">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">controle-financas | learnTECH</h1>
+            <p className="text-xs text-gray-500">Perfil ID ativo: {profile.id}</p>
+          </div>
+          <button 
+            onClick={() => { localStorage.removeItem('active_profile_id'); setProfile(null); }}
+            className="px-4 py-2 bg-red-100 text-red-700 rounded-lg text-sm font-semibold hover:bg-red-200 transition">
+            Trocar / Sair
           </button>
-          <span className="text-xs text-slate-500">
-            Se este botão estiver estilizado em roxo, o Tailwind v4 está funcionando perfeitamente!
-          </span>
-        </div>
+        </header>
+
+        {/* Dashboard de KPIs */}
+        <DashboardSummary refreshTrigger={refresh} />
+
+        {/* Upload de Novo Cupom */}
+        <ReceiptUpload onUploadSuccess={handleUploadSuccess} />
+
+        {/* Listagem de Cupons */}
+        <ReceiptsList refreshTrigger={refresh} />
       </div>
     </div>
-  )
+  );
 }
-
-export default App
