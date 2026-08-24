@@ -486,6 +486,32 @@ Estes itens representam os ajustes funcionais, de experiência do usuário (UX) 
 
 ---
 
+
+### Passo a Passo da Fase 4: Testes, Refinamento e Validação (QA & Deploy)
+
+Nesta etapa final, vamos estruturar os testes de garantia de qualidade (QA), validação de usabilidade móvel (*mobile-first*) e o processo de publicação do ecossistema em produção.
+
+#### 1. Testes Unitários e de Integração no Backend
+* **Validação de Regras e IDs:**
+  * Implementação e execução de testes automatizados (via Jest ou Mocha/Supertest) para validar a geração dos identificadores únicos combinados, regras de normalização de dados fiscais e integridade relacional entre `users`, `profiles`, `receipts` e `products` no Supabase.
+
+#### 2. Validação de Responsividade e Mobile-First
+* **Experiência de Campo:**
+  * Testes de layout e usabilidade em dispositivos móveis focando no fluxo rápido de captura e upload de recibos em campo, garantindo que os botões, modais e pré-visualizações (*preview*) se ajustem perfeitamente a diferentes tamanhos de tela usando o Tailwind CSS.
+
+#### 3. Testes End-to-End (E2E) com Cenários Reais
+* **Simulação de Ecossistema:**
+  * Execução de testes de ponta a ponta simulando jornadas completas de usuários reais utilizando cupons de diferentes estabelecimentos de referência mapeados no projeto (como *Bahamas*, *iFood*, *Bassamar* e *Pais & Filhos*), auditando desde o envio multimodal até os cálculos do dashboard.
+
+#### 4. Deploy da Aplicação em Ambiente de Produção
+* **Publicação e Entrega Contínua:**
+  * Configuração e build de produção do frontend (utilizando a pasta estática recomendada para hospedagem) e do servidor backend (em provedores de nuvem como Render, Railway ou Vercel).
+  * Configuração final de variáveis de ambiente (`SUPABASE_URL`, chaves de API do Gemini) e validação de rotas em produção.
+
+
+---
+
+
 ## 👨‍💻 Autor / Desenvolvedor
 
 Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecossistema LearnTECH.
