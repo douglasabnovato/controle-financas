@@ -250,6 +250,9 @@ Este plano de ação define as fases estratégicas para a implementação da apl
    * Realizar o deploy da aplicação em ambiente de produção.
 
 
+---
+
+
 ### 🗺️ Execução do Plano de Ação: `controle-financas`
 
 Este plano de ação define as fases estratégicas para a implementação da aplicação, estruturadas em tópicos enumerados para orientar o desenvolvimento técnico no ecossistema LearnTECH.
@@ -371,12 +374,60 @@ Com a estrutura montada, adicione os arquivos ao versionamento:
 git add .
 git commit -m "chore: setup inicial do client react e server node"
 ```
+ 
+
+---
+
+
+### Passo a Passo da Fase 2: Desenvolvimento do Backend (API Core e Regras de Negócio)
+
+Nesta etapa, vamos estruturar os controladores, serviços e rotas do servidor Express para gerenciar usuários, perfis/Business Units (BUs) e o processamento de cupons.
+
+#### 1. Gestão de Usuários e Perfis (BUs)
+* **Criar rotas de usuários (`src/routes/userRoutes.js`):**
+  * `POST /api/users`: Cadastro de um novo usuário.
+  * `GET /api/users/:id`: Busca de dados do usuário e seus perfis vinculados.
+* **Criar rotas de perfis (`src/routes/profileRoutes.js`):**
+  * `POST /api/profiles`: Criação de uma nova Business Unit (BU) associada ao usuário.
+
+#### 2. Processamento Inteligente de Cupons (Visão Multimodal)
+* **Endpoint de Envio e Extração (`src/routes/receiptRoutes.js`):**
+  * `POST /api/receipts/process`: Recebe a imagem do cupom enviada pelo cliente.
+  * Integração com modelo multimodal de visão para extração e conversão dos dados do cupom em um JSON estruturado.
+
+#### 3. Persistência e Regras de Negócio
+* **Regra de Normalização e Gravação:**
+  * Persistência dos dados macro na tabela `receipts` (incluindo o JSON bruto de transcrição).
+  * Normalização e gravação dos itens detalhados na tabela `products` vinculados ao cupom (`receipt_id`).
+* **Endpoints de Consulta e Dashboard:**
+  * `GET /api/receipts`: Listagem geral de cupons do perfil/BU.
+  * `GET /api/receipts/:id`: Detalhamento completo dos produtos de um cupom específico.
+  * `GET /api/dashboard/summary`: Agregação de dados financeiros para o painel principal.
+
+ 
+
+### 📌 Melhorias e Refinamentos Futuros do Backend (Backlog Técnico)
+
+Estes itens representam ajustes pontuais mapeados para blindar a API, otimizar a performance e garantir maior resiliência antes da versão final de produção:
+
+1. **Validação Rigorosa de Entrada (Data Sanitization):**
+   - Implementar middlewares de validação (ex: Joi ou express-validator) para checar a integridade de UUIDs e campos obrigatórios antes de atingir as camadas de persistência, retornando códigos HTTP padronizados (`400 Bad Request`).
+
+2. **Normalização e Tratamento de Datas pela IA:**
+   - Adicionar regras de fallback no serviço de extração (`geminiService.js`) para tratar casos onde o modelo multimodal retorne datas incompletas ou defasadas, garantindo que o carimbo de data/hora respeite o contexto temporal atual.
+
+3. **Paginação e Filtros Avançados de Consulta:**
+   - Evoluir a rota `GET /api/receipts` para aceitar parâmetros opcionais de paginação (`page`, `limit`) e filtros por intervalo de datas (`start_date`, `end_date`), evitando gargalos de performance no carregamento de grandes volumes de cupons.
+
+4. **Padronização Global de Respostas de Erro:**
+   - Uniformizar o contrato JSON de erro em toda a aplicação (ex: `{ success: false, error: "Mensagem descritiva" }`), facilitando o consumo e exibição de alertas visuais (toasts) no frontend React.
+
 
 
 ---
 
-### Passo a Passo da Fase 2 
 
+### Passo a Passo da Fase 2: Desenvolvimento do Backend (API Core e Regras de Negócio)
 
 ---
 
