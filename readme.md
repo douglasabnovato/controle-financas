@@ -197,6 +197,121 @@ CREATE TABLE products (
 * **Persistência Limpa:** O PostgreSQL armazena os dados normalizados. A imagem não é salva no servidor.
 * **Consumo no Dashboard:** O Frontend consome os dados para alimentar os gráficos gerenciais, KPIs e a seção analítica de Inteligência.
  
+
+---
+
+
+## 🌿 7. Workflow Git e Estratégia de Branches
+
+Para garantir a estabilidade do código em produção e organizar o desenvolvimento no ecossistema **LearnTECH**, o projeto adota um fluxo de trabalho baseado em branches direcionadas:
+
+* **`main`:** Branch de produção. Contém apenas versões estáveis e testadas do sistema.
+* **`developer-mvp`:** Branch de integração contínua e testes de novas funcionalidades consolidadas antes de irem para produção.
+* **`feature/*`:** Branches de desenvolvimento isolado para novas features (ex: `feature/frontend`, `feature/backend`, `feature/ai-integration`).
+
+### **Boas Práticas de Commit e Versionamento**
+* O desenvolvimento de novas telas ou serviços deve ser feito obrigatoriamente em uma branch `feature/` dedicada.
+* Após a validação local, abra um Pull Request para a branch de integração ou produção, mantendo o histórico limpo e segregado.
+
+
+---
+
+
+## 🗺️ Plano de Ação: `controle-financas`
+
+Este plano de ação define as fases estratégicas para a implementação da aplicação, estruturadas em tópicos enumerados para orientar o desenvolvimento técnico no ecossistema LearnTECH.
+
+---
+
+1. **Fase 1: Configuração do Ambiente e Repositório (Setup Inicial)**
+   * Inicializar o repositório no GitHub com a estrutura de pastas separada (`client/` e `server/`) e o arquivo `README.md` consolidado.
+   * Configurar o projeto frontend com React, Vite e Tailwind CSS.
+   * Configurar o projeto backend com Node.js, Express e as dependências essenciais (como `cors`, `dotenv`, `pg` e cliente HTTP).
+   * Configurar a instância do PostgreSQL (via Supabase) e executar os scripts DDL das tabelas (`users`, `profiles`, `receipts` e `products`).
+
+2. **Fase 2: Desenvolvimento do Backend (API Core e Regras de Negócio)**
+   * Criar as rotas e controladores para o cadastro e gestão de usuários e perfis/Business Units (BUs).
+   * Implementar o serviço de recebimento de imagem temporária (mantendo a premissa de armazenamento local no cliente).
+   * Integrar a API ao modelo multimodal de visão para processamento das imagens de cupons e conversão em JSON estruturado.
+   * Desenvolver a regra de negócio para atribuição automática do ID sequencial único (`C001`, `C002`, ...) e persistência dos dados normalizados nas tabelas `receipts` e `products`.
+   * Criar os endpoints de listagem de cupons, detalhamento de itens e agregação de dados para o dashboard.
+
+3. **Fase 3: Desenvolvimento do Frontend (Interfaces e UX)**
+   * Desenvolver a tela inicial de cadastro de usuário e a seleção de perfil/BU de trabalho.
+   * Criar o componente de upload de imagens com pré-visualização (*preview* local) e envio para o backend.
+   * Desenvolver a tela de listagem de cupons (*Catálogo Geral*) contendo o botão de detalhes (*Progressive Disclosure*) para abrir o modal com a lista mestra de produtos.
+   * Implementar o *Módulo Dashboard* com os cartões de KPIs (gasto total, ticket médio, impostos) e gráficos consolidados.
+   * Desenvolver a *Seção de Inteligência & Insights* para exibir as orientações, alertas de variação de preços e sugestões automatizadas.
+
+4. **Fase 4: Testes, Refinamento e Validação (QA & Deploy)**
+   * Realizar testes unitários e de integração no backend para validar regras de IDs sequenciais e persistência.
+   * Validar a responsividade e a experiência *mobile-first* no frontend para o fluxo de envio rápido de recibos.
+   * Executar testes end-to-end (E2E) simulando o fluxo completo com os cupons de exemplo (Bahamas, iFood, Bassamar, Pais & Filhos).
+   * Realizar o deploy da aplicação em ambiente de produção.
+
+
+### 🗺️ Execução do Plano de Ação: `controle-financas`
+
+Este plano de ação define as fases estratégicas para a implementação da aplicação, estruturadas em tópicos enumerados para orientar o desenvolvimento técnico no ecossistema LearnTECH.
+
+---
+
+### Passo a Passo da Fase 1 
+
+#### 1. Criar e Configurar a Estrutura de Pastas (client e server)
+No terminal, na raiz do projeto (controle-financas), crie as pastas principais para separar o frontend e o backend:
+
+```Bash
+mkdir client server
+```
+
+#### 2. Inicializar o Projeto Frontend (client) com React + Vite + Tailwind
+Entre na pasta client, crie uma aplicação React usando Vite e instale o Tailwind CSS:
+
+```Bash
+cd client
+npm create vite@latest . -- --template react
+npm install
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+#### 3. Inicializar o Projeto Backend (server) com Node.js e Express
+Volte para a raiz e acesse a pasta server para iniciar o projeto Node e instalar as dependências essenciais:
+
+```Bash
+cd ../server
+npm init -y
+npm install express cors dotenv pg
+npm install -D nodemon
+```
+
+#### 4. Estruturar os Arquivos de Configuração do Banco de Dados
+Ainda na pasta server, crie a pasta de banco de dados e os arquivos essenciais:
+
+```Bash
+mkdir src src/database src/controllers src/services
+touch src/index.js src/database/connection.js .env
+```
+
+No arquivo .env, adicione a string de conexão:
+
+```Env
+PORT=3000
+DATABASE_URL=sua_string_de_conexao_do_supabase_aqui
+```
+
+#### 5. Executar os Scripts DDL no Supabase
+Acesse o painel do seu projeto no Supabase, abra o SQL Editor e execute os comandos para criar as tabelas users, profiles, receipts e products.
+
+#### 6. Registrar as Alterações no Git
+Com a estrutura montada, adicione os arquivos ao versionamento:
+
+```Bash
+git add .
+git commit -m "chore: setup inicial do client react e server node"
+```
+
 ---
 
 ## 👨‍💻 Autor / Desenvolvedor
