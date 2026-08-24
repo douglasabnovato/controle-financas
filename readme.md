@@ -304,6 +304,66 @@ DATABASE_URL=sua_string_de_conexao_do_supabase_aqui
 #### 5. Executar os Scripts DDL no Supabase
 Acesse o painel do seu projeto no Supabase, abra o SQL Editor e execute os comandos para criar as tabelas users, profiles, receipts e products.
 
+### Passo a Passo: Execução do DDL e Validação do Banco
+
+#### 1. Acessar o Supabase e o SQL Editor
+* Faça login na sua conta do Supabase e abra o painel do seu projeto.
+* No menu lateral esquerdo, clique na opção **SQL Editor**.
+* Clique em **New query** para criar uma nova aba de consulta em branco.
+
+#### 2. Executar o Script DDL das Tabelas Relacionais
+Cole o script DDL completo abaixo no editor SQL do Supabase e clique no botão **Run** (ou pressione `Ctrl + Enter`) para criar as tabelas `users`, `profiles`, `receipts` e `products`:
+
+```sql
+-- 1. Tabela de Usuários
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    nickname VARCHAR(100) NOT NULL,
+    whatsapp VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Tabela de Perfis e Business Units (BUs)
+CREATE TABLE profiles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    profile_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 3. Tabela de Cupons (Catálogo Geral - Visão Macro)
+CREATE TABLE receipts (
+    id SERIAL PRIMARY KEY,
+    profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+    store_name VARCHAR(255) NOT NULL,
+    cnpj VARCHAR(50),
+    purchase_date TIMESTAMP NOT NULL,
+    total_amount DECIMAL(10,2) NOT NULL,
+    document_type VARCHAR(50) NOT NULL,
+    raw_transcription JSONB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 4. Tabela de Produtos (Lista Mestra - Visão Detalhada)
+CREATE TABLE products (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    receipt_id INTEGER REFERENCES receipts(id) ON DELETE CASCADE,
+    product_name VARCHAR(255) NOT NULL,
+    quantity DECIMAL(10,3) NOT NULL,
+    unit_price DECIMAL(10,2) NOT NULL,
+    total_price DECIMAL(10,2) NOT NULL
+);
+```
+
+#### 3. Iniciar o Servidor Backend e Validar a Conexão
+No seu terminal, certifique-se de que está posicionado na pasta server e execute o comando de desenvolvimento para verificar se a conexão com o PostgreSQL do Supabase foi estabelecida com sucesso:
+
+```Bash
+npm run dev
+```
+
 #### 6. Registrar as Alterações no Git
 Com a estrutura montada, adicione os arquivos ao versionamento:
 
@@ -311,6 +371,12 @@ Com a estrutura montada, adicione os arquivos ao versionamento:
 git add .
 git commit -m "chore: setup inicial do client react e server node"
 ```
+
+
+---
+
+### Passo a Passo da Fase 2 
+
 
 ---
 
