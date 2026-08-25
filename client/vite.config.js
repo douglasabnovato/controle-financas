@@ -7,4 +7,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/controle-financas/',
+  build: {
+    outDir: '../docs',  
+    emptyOutDir: true,
+  },
 })
