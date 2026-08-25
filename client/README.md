@@ -1,16 +1,29 @@
-# React + Vite
+# 💻 Módulo Frontend (`client/`) - Controle Finanças
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+> Interface web reativa e de alta performance desenvolvida em React.js, Vite e Tailwind CSS, focada na experiência *mobile-first* para catalogação e auditoria de despesas.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 1. Estrutura de Pastas do Módulo
 
-## React Compiler
+O frontend foi desenhado sob o conceito de componentização modular e desacoplada:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* `src/components/`: Componentes estruturais e modais (Upload, Dashboard, Listagem).
+* `src/pages/`: Telas principais de roteamento e fluxo (Home, Dashboard, Catálogo).
+* `src/services/`: Camada de integração HTTP com a API utilizando Axios.
+* `src/App.jsx`: Roteamento central e gerenciamento de estado global da sessão.
+* `src/main.jsx`: Ponto de montagem da aplicação React.
+* `vite.config.js`: Configuração de build otimizada para a pasta `/docs` (GitHub Pages).
 
-## Expanding the Oxlint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+## 🛠️ 2. Detalhes de Implementação Técnica
+
+### 2.1. Gerenciamento de Sessão e BUs (`Home.jsx`)
+* **Persistência Local:** O sistema armazena o identificador ativo do perfil do usuário via `localStorage` (como `active_profile_id`), redirecionando para o fluxo de cadastro se necessário.
+
+### 2.2. Upload e Privacidade com Preview (`ReceiptUpload.jsx`)
+* **Armazenamento Local Estrito:** A imagem bruta do cupom não é armazenada em servidores externos. O componente gera um preview local via URL de objeto (`URL.createObjectURL`) para validação imediata antes do envio temporário em formato `FormData`.
+
+### 2.3. Progressive Disclosure (`ReceiptsList.jsx`)
+* **Auditoria de Itens:** Os metadados macro do cupom aparecem na listagem principal, enquanto os produtos detalhados ficam ocultos em um modal interativo de alta responsividade acionado sob demanda.
