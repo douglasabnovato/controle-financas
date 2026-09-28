@@ -1,27 +1,31 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+/* Ponto de entrada: valida configuração, migra o banco e sobe a API */
+require("dotenv").config();
+const { Pool } = require("pg");
+const { GoogleGenAI } = require("@google/genai");
+const { loadConfig, missing } = require("./config");
+const { migrate } = require("./db/migrate");
+const { createRepositories } = require("./repositories");
+const { createGeminiExtractor } = require("./services/receiptExtractor");
+const { createApp } = require("./app");
 
-const userRoutes = require('./routes/userRoutes');
-const profileRoutes = require('./routes/profileRoutes');
-const receiptRoutes = require('./routes/receiptRoutes');
+/* Inicializa dependências e escuta na porta configurada */
+async function main() {
+  const config = loadConfig();
+  const absent = missing(config);
+  if (absent.length) {
+    console.error(`Configuração incompleta: ${absent.join(", ")}. Veja server/.env.example.`);
+    process.exit(1);
+  }
+  const pool = new Pool({ connectionString: config.databaseUrl, ssl: config.databaseSsl ? { rejectUnauthorized: false } : undefined, max: 5 });
+  await migrate(pool);
+  const extractor = createGeminiExtractor({ client: new GoogleGenAI({}), model: config.geminiModel });
+  createApp({ repos: createRepositories(pool), extractor, config }).listen(config.port, () =>
+    console.log(`API controle-financas na porta ${config.port}`)
+  );
+}
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-app.use(cors());
-app.use(express.json());
-
-// Registrar Rotas da API
-app.use('/api/users', userRoutes);
-app.use('/api/profiles', profileRoutes);
-app.use('/api/receipts', receiptRoutes);
-
-// Rota de Teste do Servidor
-app.get('/', (req, res) => {
-  res.json({ message: 'API do controle-financas rodando com sucesso no ecossistema learnTECH!' });
+main().catch((err) => {
+  console.error("Falha ao iniciar:", err.message);
+  process.exit(1);
 });
-
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+/* Fim de index.js */

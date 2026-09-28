@@ -1,80 +1,74 @@
-import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+/* Catálogo de cupons do perfil com estados de carregando, erro, vazio e detalhe */
+import { useEffect, useState } from 'react';
+import api, { errorMessage } from '../services/api';
+import Notice from '../components/Notice';
+import ReceiptDialog from '../components/ReceiptDialog';
+import { formatBRL, formatDate } from '../utils/format';
 
-export default function ReceiptsList({ refreshTrigger }) {
-  const [receipts, setReceipts] = useState([]);
-  const [selectedReceipt, setSelectedReceipt] = useState(null);
-  const [products, setProducts] = useState([]);
+export default function ReceiptsList({ profileId, refreshTrigger }) {
+  const [state, setState] = useState({ loading: true, error: '', receipts: [] });
+  const [detail, setDetail] = useState(null);
 
-  const fetchReceipts = async () => {
-    const profile_id = localStorage.getItem('active_profile_id');
-    if (!profile_id) return;
-    try {
-      const res = await api.get(`/receipts?profile_id=${profile_id}`);
-      setReceipts(res.data.receipts);
-    } catch (err) {
-      console.error('Erro ao buscar recibos', err);
-    }
-  };
+  const [reload, setReload] = useState(0);
 
   useEffect(() => {
-    fetchReceipts();
-  }, [refreshTrigger]);
+    let active = true;
+    api
+      .get('/receipts', { params: { profile_id: profileId } })
+      .then((res) => active && setState({ loading: false, error: '', receipts: res.data.receipts }))
+      .catch((err) => active && setState({ loading: false, error: errorMessage(err), receipts: [] }));
+    return () => {
+      active = false;
+    };
+  }, [profileId, refreshTrigger, reload]);
 
-  const handleOpenDetails = async (id) => {
+  /* Reexecuta a busca após um erro */
+  function retry() {
+    setState((s) => ({ ...s, loading: true, error: '' }));
+    setReload((n) => n + 1);
+  }
+
+  /* Carrega itens do cupom escolhido */
+  async function openDetails(id) {
     try {
-      const res = await api.get(`/receipts/${id}`);
-      setSelectedReceipt(res.data.receipt);
-      setProducts(res.data.products);
+      const res = await api.get(`/receipts/${id}`, { params: { profile_id: profileId } });
+      setDetail(res.data);
     } catch (err) {
-      console.error('Erro ao buscar detalhes', err);
+      setState((s) => ({ ...s, error: errorMessage(err) }));
     }
-  };
+  }
 
   return (
-    <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
-      <h3 className="text-lg font-semibold text-gray-800 mb-4">Catálogo de Cupons Fiscais</h3>
-      <div className="space-y-3">
-        {receipts.length === 0 ? (
-          <p className="text-sm text-gray-500">Nenhum cupom cadastrado ainda.</p>
-        ) : (
-          receipts.map((r) => (
-            <div key={r.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
-              <div>
-                <p className="font-bold text-gray-700">{r.store_name}</p>
-                <p className="text-xs text-gray-500">Data: {new Date(r.purchase_date).toLocaleDateString()}</p>
-              </div>
-              <div className="text-right">
-                <span className="font-semibold text-green-600">R$ {r.total_amount}</span>
-                <button onClick={() => handleOpenDetails(r.id)} className="ml-4 px-3 py-1 bg-blue-100 text-blue-700 text-sm rounded hover:bg-blue-200">
-                  Detalhes
-                </button>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-
-      {selectedReceipt && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white p-6 rounded-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
-            <h4 className="text-xl font-bold mb-2">{selectedReceipt.store_name}</h4>
-            <p className="text-sm text-gray-500 mb-4">CNPJ: {selectedReceipt.cnpj}</p>
-            <h5 className="font-semibold text-gray-700 mb-2">Itens Comprados:</h5>
-            <ul className="divide-y text-sm mb-4">
-              {products.map(p => (
-                <li key={p.id} className="py-2 flex justify-between">
-                  <span>{p.quantity}x {p.product_name}</span>
-                  <span className="font-medium">R$ {p.total_price}</span>
-                </li>
-              ))}
-            </ul>
-            <button onClick={() => setSelectedReceipt(null)} className="w-full py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
-              Fechar
-            </button>
-          </div>
-        </div>
+    <section aria-labelledby="catalog-title" className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
+      <h2 id="catalog-title" className="mb-4 text-lg font-semibold text-gray-900">Catálogo de cupons fiscais</h2>
+      {state.loading && <p role="status" className="text-sm text-gray-700">Carregando cupons…</p>}
+      {state.error && (
+        <>
+          <Notice kind="error">{state.error}</Notice>
+          <button type="button" onClick={retry} className="mt-2 rounded bg-blue-100 px-3 py-1 text-sm text-blue-900">Tentar novamente</button>
+        </>
       )}
-    </div>
+      {!state.loading && !state.error && state.receipts.length === 0 && (
+        <p className="text-sm text-gray-700">Nenhum cupom cadastrado ainda. Envie a foto do primeiro acima.</p>
+      )}
+      <ul className="space-y-3">
+        {state.receipts.map((r) => (
+          <li key={r.id} className="flex items-center justify-between rounded-lg border p-3">
+            <div>
+              <p className="font-bold text-gray-900">{r.code} · {r.store_name}</p>
+              <p className="text-xs text-gray-700">Data: {formatDate(r.purchase_date)}</p>
+            </div>
+            <div className="text-right">
+              <span className="font-semibold text-green-800">{formatBRL(r.total_amount)}</span>
+              <button type="button" onClick={() => openDetails(r.id)} className="ml-4 rounded bg-blue-100 px-3 py-1 text-sm text-blue-900 hover:bg-blue-200">
+                Detalhes<span className="sr-only"> do cupom {r.code}</span>
+              </button>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {detail && <ReceiptDialog detail={detail} onClose={() => setDetail(null)} />}
+    </section>
   );
 }
+/* Fim de ReceiptsList.jsx */

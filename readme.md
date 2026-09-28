@@ -4,23 +4,59 @@
 
 ---
 
+## 🌐 Em produção
+
+- Front: https://douglasabnovato.github.io/controle-financas/ (GitHub Pages, pasta `docs/` da `main`)
+- API: https://controle-financas-api-71f6.onrender.com (Render Free, `render.yaml`; dorme após 15 min sem uso) + PostgreSQL no Supabase
+- Passo a passo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md)
+
+---
+
+## ✅ Estado atual (ciclo MVP)
+
+| Item | Situação |
+|---|---|
+| Cadastro de usuário/BU, envio de cupom com IA, catálogo, detalhe e dashboard | Implementado e testado |
+| Autenticação | Token de acesso (`API_TOKEN`) exigido em todas as rotas `/api` |
+| Deduplicação e código `C001` | Implementado |
+| Insights e variação de preços | Roadmap |
+
+### Como rodar
+
+```sh
+# API
+cd server && cp .env.example .env   # preencha DATABASE_URL, API_TOKEN e GEMINI_API_KEY
+npm install && npm run dev          # cria/atualiza as tabelas e sobe em :3000
+TEST_DATABASE_URL=postgres://... npm test
+
+# Front
+cd client && npm install && npm run dev   # http://localhost:5173
+npm test && npm run build                 # build em ../docs (GitHub Pages)
+```
+
+Na primeira tela, informe o mesmo `API_TOKEN` configurado na API. Deploy gratuito: API no Render (`render.yaml`), banco no Supabase, front no GitHub Pages. CI: mova `ci/github-actions-ci.yml` para `.github/workflows/ci.yml`. Guia completo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md).
+
+Documentação do ciclo: [documentacao/ANALISE.md](documentacao/ANALISE.md) · [documentacao/ARQUITETURA.md](documentacao/ARQUITETURA.md) · [documentacao/PLANO-DE-ACAO.md](documentacao/PLANO-DE-ACAO.md)
+
+---
+
 ## 🎯 1. Objetivo e Descrição do Projeto
 
 O **controle-financas** é um módulo do ecossistema **LearnTECH** desenvolvido para documentar, praticar e aplicar conceitos avançados de Engenharia de Software, Arquitetura de Produtos Digitais e Inteligência Analítica. 
 
-O objetivo principal da aplicação é **catalogar os cupons fiscais das despesas cotidianas e de viagens**, automatizando a extração de dados através de IA, garantindo a privacidade do usuário (armazenamento local de imagens) e oferecendo um painel consolidado com **Dashboard gerencial** e **Insights de Inteligência**.
+O objetivo principal da aplicação é **catalogar os cupons fiscais das despesas cotidianas e de viagens**, automatizando a extração de dados através de IA, sem guardar as imagens no servidor (a foto é enviada ao modelo de IA apenas para leitura) e oferecendo um painel consolidado com **Dashboard gerencial** e **Insights de Inteligência**.
 
 ---
 
 ## 🚀 2. Principais Funcionalidades
 
 - **Autenticação e Perfis de Usuário:** Cadastro com Nome, E-mail, Nickname e WhatsApp, permitindo segmentar os lançamentos por perfis de uso ou Business Units (BUs).
-- **Upload Local de Comprovantes:** Envio de imagens (cupons fiscais eletrônicos, SAT, iFood, bilhetes de passagem) mantendo a imagem bruta estritamente no dispositivo local do usuário (privacidade garantida).
+- **Upload de Comprovantes:** Envio de imagens (cupons fiscais eletrônicos, SAT, iFood, bilhetes de passagem). A imagem trafega só em memória: é enviada ao Google Gemini para leitura e **não é gravada** no servidor nem no banco.
 - **Extração Automatizada (OCR / IA):** Leitura inteligente e estruturação automática de dados (estabelecimentos, CNPJ, datas, lista de produtos, impostos e descontos).
 - **Catalogação Sequencial Única:** Atribuição automática de IDs crescentes (`C001`, `C002`, ...) para rastreabilidade rigorosa e prevenção de duplicidade.
 - **Detalhes do Cupom:** Modal interativo de *Progressive Disclosure* para auditar a lista completa de itens de cada compra.
 - **Módulo Dashboard:** Visão macro com KPIs de gastos, filtros por período/perfil e gráficos consolidados.
-- **Seção de Inteligência & Insights:** Recomendações automatizadas, rastreio de variação de preços de produtos e alertas de gestão por BU.
+- **Seção de Inteligência & Insights (roadmap):** Recomendações automatizadas, rastreio de variação de preços de produtos e alertas de gestão por BU — ainda não implementada.
 
 ---
 
@@ -123,7 +159,7 @@ O sistema adota uma Arquitetura Client-Server Desacoplada, separando claramente 
   * Gerenciamento de rotas e navegação fluida (Dashboard, Gestão de Cupons, Seção de Insights).
   * Experiência Mobile-First otimizada para captura e envio rápido de fotos via dispositivos móveis.
   * Componentes reutilizáveis, incluindo modais para exibição detalhada de itens (Progressive Disclosure).
-  * Manutenção estrita das imagens brutas no armazenamento local do usuário, enviando apenas stream temporário para processamento.
+  * A imagem é enviada em memória para a API, repassada ao modelo de IA e descartada; nada é salvo em disco.
 
 #### 2.2. Camada de Serviço e Negócio (Backend)
 * **Tecnologias:** Node.js e Express.

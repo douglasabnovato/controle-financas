@@ -1,78 +1,87 @@
-import React, { useState } from 'react';
-import api from '../services/api';
+/* Configuração de acesso: token da API, dados do usuário e primeira BU (ou uso de um perfil existente) */
+import { useState } from 'react';
+import api, { errorMessage, keys, storage } from '../services/api';
+import Notice from '../components/Notice';
+
+const FIELDS = [
+  { name: 'full_name', label: 'Nome completo', type: 'text', autoComplete: 'name' },
+  { name: 'email', label: 'E-mail', type: 'email', autoComplete: 'email' },
+  { name: 'nickname', label: 'Apelido', type: 'text', autoComplete: 'nickname' },
+  { name: 'whatsapp', label: 'WhatsApp (DDD + número)', type: 'tel', autoComplete: 'tel-national' },
+  { name: 'profile_name', label: 'Business Unit (BU)', type: 'text' },
+];
 
 export default function Home({ onLoginSuccess }) {
-  const [formData, setFormData] = useState({
-    full_name: '',
-    email: '',
-    nickname: '',
-    whatsapp: '',
-    profile_name: 'Despesas Pessoais'
-  });
+  const [token, setToken] = useState(storage.get(keys.TOKEN_KEY) || '');
+  const [existingProfile, setExistingProfile] = useState('');
+  const [formData, setFormData] = useState({ full_name: '', email: '', nickname: '', whatsapp: '', profile_name: 'Despesas Pessoais' });
+  const [status, setStatus] = useState({ kind: 'info', text: '' });
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const userRes = await api.post('/users', {
-        full_name: formData.full_name,
-        email: formData.email,
-        nickname: formData.nickname,
-        whatsapp: formData.whatsapp
-      });
-      
-      const userId = userRes.data.user.id;
-
-      const profileRes = await api.post('/profiles', {
-        user_id: userId,
-        profile_name: formData.profile_name
-      });
-
-      const activeProfile = profileRes.data.profile;
-      localStorage.setItem('active_profile_id', activeProfile.id);
-      
-      alert('Perfil e BU configurados com sucesso!');
-      if (onLoginSuccess) onLoginSuccess(activeProfile);
-    } catch (error) {
-      console.error('Erro ao configurar perfil:', error);
-      alert('Erro ao cadastrar usuário/perfil.');
+  /* Salva o token e, se informado, usa um perfil já existente */
+  function saveTokenAndMaybeProfile() {
+    storage.set(keys.TOKEN_KEY, token.trim());
+    if (existingProfile.trim()) {
+      storage.set(keys.PROFILE_KEY, existingProfile.trim());
+      onLoginSuccess({ id: existingProfile.trim() });
+      return true;
     }
-  };
+    return false;
+  }
+
+  /* Cria usuário e BU na API */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    if (!token.trim()) {
+      setStatus({ kind: 'error', text: 'Informe o token de acesso da API.' });
+      return;
+    }
+    if (saveTokenAndMaybeProfile()) return;
+    setBusy(true);
+    setStatus({ kind: 'info', text: 'Configurando seu acesso…' });
+    try {
+      const { full_name, email, nickname, whatsapp } = formData;
+      const userRes = await api.post('/users', { full_name, email, nickname, whatsapp });
+      const profileRes = await api.post('/profiles', { user_id: userRes.data.user.id, profile_name: formData.profile_name });
+      storage.set(keys.PROFILE_KEY, profileRes.data.profile.id);
+      onLoginSuccess(profileRes.data.profile);
+    } catch (error) {
+      setStatus({ kind: 'error', text: errorMessage(error) });
+    } finally {
+      setBusy(false);
+    }
+  }
 
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-xl shadow-md border border-gray-100">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Configurar Acesso - learnTECH</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <main className="mx-auto mt-10 max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-md">
+      <h1 className="mb-6 text-2xl font-bold text-gray-900">Configurar acesso</h1>
+      <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Nome Completo</label>
-          <input type="text" className="w-full mt-1 p-2 border rounded-lg" 
-            value={formData.full_name} onChange={e => setFormData({...formData, full_name: e.target.value})} required />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700">E-mail</label>
-          <input type="email" className="w-full mt-1 p-2 border rounded-lg" 
-            value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
-        </div>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Apelido (Nickname)</label>
-            <input type="text" className="w-full mt-1 p-2 border rounded-lg" 
-              value={formData.nickname} onChange={e => setFormData({...formData, nickname: e.target.value})} required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">WhatsApp</label>
-            <input type="text" className="w-full mt-1 p-2 border rounded-lg" 
-              value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} required />
-          </div>
+          <label htmlFor="token" className="block text-sm font-medium text-gray-800">Token de acesso da API</label>
+          <input id="token" type="password" autoComplete="off" className="mt-1 w-full rounded-lg border border-gray-400 p-2" value={token} onChange={(e) => setToken(e.target.value)} required />
+          <p className="mt-1 text-xs text-gray-700">Fica salvo apenas neste navegador.</p>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Business Unit (BU)</label>
-          <input type="text" className="w-full mt-1 p-2 border rounded-lg" 
-            value={formData.profile_name} onChange={e => setFormData({...formData, profile_name: e.target.value})} required />
+          <label htmlFor="existing" className="block text-sm font-medium text-gray-800">Já tenho um perfil (ID da BU) — opcional</label>
+          <input id="existing" type="text" className="mt-1 w-full rounded-lg border border-gray-400 p-2" value={existingProfile} onChange={(e) => setExistingProfile(e.target.value)} />
         </div>
-        <button type="submit" className="w-full py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
-          Entrar no Ecossistema
+        {!existingProfile && (
+          <fieldset className="space-y-4">
+            <legend className="text-sm font-semibold text-gray-900">Ou crie seu usuário e a primeira BU</legend>
+            {FIELDS.map((f) => (
+              <div key={f.name}>
+                <label htmlFor={f.name} className="block text-sm font-medium text-gray-800">{f.label}</label>
+                <input id={f.name} type={f.type} autoComplete={f.autoComplete} className="mt-1 w-full rounded-lg border border-gray-400 p-2" value={formData[f.name]} onChange={(e) => setFormData({ ...formData, [f.name]: e.target.value })} required />
+              </div>
+            ))}
+          </fieldset>
+        )}
+        <button type="submit" disabled={busy} className="w-full rounded-lg bg-blue-700 py-2 font-semibold text-white transition hover:bg-blue-800 disabled:opacity-60">
+          {busy ? 'Aguarde…' : 'Entrar'}
         </button>
+        <Notice kind={status.kind}>{status.text}</Notice>
       </form>
-    </div>
+    </main>
   );
 }
+/* Fim de Home.jsx */

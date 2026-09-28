@@ -1,55 +1,60 @@
-import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+/* KPIs do perfil (total de cupons, gasto, ticket médio) e lojas com maior gasto */
+import { useEffect, useState } from 'react';
+import api, { errorMessage } from '../services/api';
+import Notice from './Notice';
+import { formatBRL } from '../utils/format';
 
-export default function DashboardSummary({ refreshTrigger }) {
-  const [summary, setSummary] = useState(null);
-  const [topStores, setTopStores] = useState([]);
+export default function DashboardSummary({ profileId, refreshTrigger }) {
+  const [data, setData] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchSummary = async () => {
-      const profile_id = localStorage.getItem('active_profile_id');
-      if (!profile_id) return;
-      try {
-        const res = await api.get(`/receipts/dashboard/summary?profile_id=${profile_id}`);
-        setSummary(res.data.summary);
-        setTopStores(res.data.top_stores);
-      } catch (err) {
-        console.error('Erro ao carregar dashboard', err);
-      }
+    let active = true;
+    api
+      .get('/receipts/dashboard/summary', { params: { profile_id: profileId } })
+      .then((res) => active && (setData(res.data), setError('')))
+      .catch((err) => active && setError(errorMessage(err)));
+    return () => {
+      active = false;
     };
-    fetchSummary();
-  }, [refreshTrigger]);
+  }, [profileId, refreshTrigger]);
 
-  if (!summary) return <p className="text-sm text-gray-500">Carregando métricas financeiras...</p>;
+  if (error) return <Notice kind="error">{error}</Notice>;
+  if (!data) return <p role="status" className="text-sm text-gray-700">Carregando métricas financeiras…</p>;
+
+  const cards = [
+    { label: 'Total de cupons', value: data.summary.total_receipts, tone: 'bg-blue-50 border-blue-100 text-blue-900' },
+    { label: 'Total gasto', value: formatBRL(data.summary.total_spent), tone: 'bg-green-50 border-green-100 text-green-900' },
+    { label: 'Ticket médio', value: formatBRL(data.summary.average_ticket), tone: 'bg-purple-50 border-purple-100 text-purple-900' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
-          <p className="text-xs text-blue-600 font-semibold uppercase">Total de Cupons</p>
-          <p className="text-2xl font-bold text-blue-900">{summary.total_receipts}</p>
-        </div>
-        <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
-          <p className="text-xs text-green-600 font-semibold uppercase">Total Gasto</p>
-          <p className="text-2xl font-bold text-green-900">R$ {Number(summary.total_spent).toFixed(2)}</p>
-        </div>
-        <div className="p-4 bg-purple-50 border border-purple-100 rounded-xl">
-          <p className="text-xs text-purple-600 font-semibold uppercase">Ticket Médio</p>
-          <p className="text-2xl font-bold text-purple-900">R$ {Number(summary.average_ticket).toFixed(2)}</p>
-        </div>
+    <section aria-labelledby="dash-title" className="space-y-6">
+      <h2 id="dash-title" className="sr-only">Resumo</h2>
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        {cards.map((c) => (
+          <div key={c.label} className={`rounded-xl border p-4 ${c.tone}`}>
+            <dt className="text-xs font-semibold uppercase">{c.label}</dt>
+            <dd className="text-2xl font-bold">{c.value}</dd>
+          </div>
+        ))}
+      </dl>
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
+        <h3 className="mb-3 font-semibold text-gray-900">Estabelecimentos com maior gasto</h3>
+        {data.top_stores.length === 0 ? (
+          <p className="text-sm text-gray-700">Os estabelecimentos aparecem aqui depois do primeiro cupom.</p>
+        ) : (
+          <ol className="space-y-2">
+            {data.top_stores.map((s) => (
+              <li key={s.store_name} className="flex justify-between rounded-lg bg-gray-50 p-2 text-sm">
+                <span className="font-medium text-gray-800">{s.store_name} ({s.visit_count} {s.visit_count === 1 ? 'visita' : 'visitas'})</span>
+                <span className="font-bold text-gray-900">{formatBRL(s.spent_at_store)}</span>
+              </li>
+            ))}
+          </ol>
+        )}
       </div>
-
-      <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
-        <h4 className="font-semibold text-gray-800 mb-3">Estabelecimentos Mais Frequentes (Top Lojas)</h4>
-        <ul className="space-y-2">
-          {topStores.map((store, idx) => (
-            <li key={idx} className="flex justify-between p-2 bg-gray-50 rounded-lg text-sm">
-              <span className="font-medium text-gray-700">{store.store_name} ({store.visit_count} visitas)</span>
-              <span className="font-bold text-gray-900">R$ {Number(store.spent_at_store).toFixed(2)}</span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
+    </section>
   );
 }
+/* Fim de DashboardSummary.jsx */
