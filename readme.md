@@ -34,9 +34,9 @@ cd client && npm install && npm run dev   # http://localhost:5173
 npm test && npm run build                 # build em ../docs (GitHub Pages)
 ```
 
-Na primeira tela, informe o mesmo `API_TOKEN` configurado na API. Deploy gratuito: API no Render (`render.yaml`), banco no Supabase, front no GitHub Pages. CI: mova `ci/github-actions-ci.yml` para `.github/workflows/ci.yml`. Guia completo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md).
+Na primeira tela, informe o mesmo `API_TOKEN` configurado na API. Deploy gratuito: API no Render (`render.yaml`), banco no Supabase, front no GitHub Pages. CI: `.github/workflows/ci.yml`. Guia completo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md).
 
-Documentação do ciclo: [documentacao/ANALISE.md](documentacao/ANALISE.md) · [documentacao/ARQUITETURA.md](documentacao/ARQUITETURA.md) · [documentacao/PLANO-DE-ACAO.md](documentacao/PLANO-DE-ACAO.md)
+Documentação do ciclo: [documentacao/ANALISE.md](documentacao/ANALISE.md) · [documentacao/ARQUITETURA.md](documentacao/ARQUITETURA.md) · [documentacao/PLANO-DE-ACAO.md](documentacao/PLANO-DE-ACAO.md) · [documentacao/AVALIACAO.md](documentacao/AVALIACAO.md) · [documentacao/PLANO-ESTRATEGICO.md](documentacao/PLANO-ESTRATEGICO.md)
 
 ---
 
