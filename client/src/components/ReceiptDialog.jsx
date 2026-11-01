@@ -2,7 +2,9 @@
 import { useEffect, useRef } from 'react';
 import { formatBRL, formatDate, formatQty } from '../utils/format';
 
-export default function ReceiptDialog({ detail, onClose }) {
+const REVIEW_LABELS = { accepted: 'Leitura aceita.', corrected: 'Leitura marcada como corrigida.' };
+
+export default function ReceiptDialog({ detail, onClose, onReview }) {
   const closeRef = useRef(null);
 
   useEffect(() => {
@@ -36,6 +38,19 @@ export default function ReceiptDialog({ detail, onClose }) {
           </ul>
         )}
         <p className="mb-4 text-right font-bold">Total: {formatBRL(receipt.total_amount)}</p>
+        <div className="mb-4 rounded-lg border border-gray-200 p-3">
+          {receipt.review_status ? (
+            <p role="status" className="text-sm text-gray-700">{REVIEW_LABELS[receipt.review_status]}</p>
+          ) : (
+            <>
+              <p className="mb-2 text-sm text-gray-900">A leitura da IA estava certa?</p>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => onReview('accepted')} className="flex-1 rounded-lg bg-green-700 py-2 text-sm text-white hover:bg-green-800">Sim, sem correção</button>
+                <button type="button" onClick={() => onReview('corrected')} className="flex-1 rounded-lg border border-gray-400 py-2 text-sm text-gray-900 hover:bg-gray-100">Precisei corrigir</button>
+              </div>
+            </>
+          )}
+        </div>
         <button ref={closeRef} type="button" onClick={onClose} className="w-full rounded-lg bg-gray-700 py-2 text-white hover:bg-gray-800">Fechar</button>
       </div>
     </div>

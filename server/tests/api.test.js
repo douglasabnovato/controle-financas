@@ -85,6 +85,14 @@ test("fluxo completo: usuário → perfil → cupom → lista → detalhe → da
 
   const dash = await auth(request(app).get("/api/receipts/dashboard/summary")).query({ profile_id: pid }).expect(200);
   assert.deepEqual(dash.body.summary, { total_receipts: 1, total_spent: 23.4, average_ticket: 23.4 });
+  assert.deepEqual(dash.body.reading_review, { accepted: 0, corrected: 0, acceptance_rate: null });
+
+  await auth(request(app).patch(`/api/receipts/${id}/review`)).send({ profile_id: other.body.profile.id, status: "accepted" }).expect(404);
+  await auth(request(app).patch(`/api/receipts/${id}/review`)).send({ profile_id: pid, status: "talvez" }).expect(400);
+  const reviewed = await auth(request(app).patch(`/api/receipts/${id}/review`)).send({ profile_id: pid, status: "accepted" }).expect(200);
+  assert.equal(reviewed.body.receipt.review_status, "accepted");
+  const after = await auth(request(app).get("/api/receipts/dashboard/summary")).query({ profile_id: pid }).expect(200);
+  assert.deepEqual(after.body.reading_review, { accepted: 1, corrected: 0, acceptance_rate: 100 });
 });
 
 test("upload inválido: sem arquivo 400, tipo errado 415, perfil inexistente 404", opts, async () => {

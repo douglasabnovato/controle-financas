@@ -16,7 +16,7 @@
 | 2 | Hipótese a validar | Existe uma aposta escrita, com meta | Parcial: meta proposta |
 | 3 | Fluxo principal completo | Uma pessoa conclui sem ajuda | Parcial: implementado e testado; não exercitado em produção para não criar dados nem gastar cota |
 | 4 | Escopo enxuto | O que não entra está registrado | Parcial: insights e variação de preços estão no roadmap |
-| 5 | Medição de uso | A métrica principal é coletada | Não atende: nada coleta uso |
+| 5 | Medição de uso | A métrica principal é coletada | Parcial: leituras aceitas e corrigidas contadas no código e no painel; falta republicar a API (#9) |
 | 6 | Falhas tratadas | Erro, vazio e carregamento têm resposta clara | Parcial: há avisos na tela; casos da IA não revistos neste ciclo |
 | 7 | Desempenho aceitável | LCP de até 2,5 s no celular | Não medido neste ciclo |
 | 8 | Acessibilidade básica | Lighthouse e teclado | Não medido neste ciclo |

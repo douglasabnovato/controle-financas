@@ -38,6 +38,17 @@ export default function ReceiptsList({ profileId, refreshTrigger }) {
     }
   }
 
+  /* Guarda se a leitura da IA foi aceita ou corrigida */
+  async function handleReview(status) {
+    try {
+      const res = await api.patch(`/receipts/${detail.receipt.id}/review`, { profile_id: profileId, status });
+      setDetail((d) => ({ ...d, receipt: { ...d.receipt, review_status: res.data.receipt.review_status } }));
+    } catch (err) {
+      setDetail(null);
+      setState((s) => ({ ...s, error: errorMessage(err) }));
+    }
+  }
+
   return (
     <section aria-labelledby="catalog-title" className="rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h2 id="catalog-title" className="mb-4 text-lg font-semibold text-gray-900">Catálogo de cupons fiscais</h2>
@@ -67,7 +78,7 @@ export default function ReceiptsList({ profileId, refreshTrigger }) {
           </li>
         ))}
       </ul>
-      {detail && <ReceiptDialog detail={detail} onClose={() => setDetail(null)} />}
+      {detail && <ReceiptDialog detail={detail} onClose={() => setDetail(null)} onReview={handleReview} />}
     </section>
   );
 }
