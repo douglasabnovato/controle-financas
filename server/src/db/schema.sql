@@ -38,6 +38,9 @@ CREATE TABLE IF NOT EXISTS products (
     total_price DECIMAL(10,2) NOT NULL
 );
 
+-- Revisão da leitura da IA: guarda só se foi aceita ou corrigida, nunca o conteúdo do cupom
+ALTER TABLE receipts ADD COLUMN IF NOT EXISTS review_status VARCHAR(20) CHECK (review_status IN ('accepted', 'corrected'));
+
 CREATE INDEX IF NOT EXISTS idx_receipts_profile_date ON receipts (profile_id, purchase_date DESC);
 CREATE INDEX IF NOT EXISTS idx_products_receipt ON products (receipt_id);
 -- Deduplicação: se já existirem cupons repetidos no banco, o índice não é criado (e o log avisa)

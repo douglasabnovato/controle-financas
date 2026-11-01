@@ -5,7 +5,7 @@ const helmet = require("helmet");
 const multer = require("multer");
 const rateLimit = require("express-rate-limit");
 const { AppError } = require("./lib/errors");
-const { userInput, profileInput, profileQuery } = require("./lib/schemas");
+const { userInput, profileInput, profileQuery, reviewInput } = require("./lib/schemas");
 const { requireToken } = require("./middleware/auth");
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
@@ -77,6 +77,15 @@ function createApp({ repos, extractor, config }) {
     const found = await repos.receipts.findInProfile(id, profile_id);
     if (!found) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
     res.json(found);
+  });
+
+  api.patch("/receipts/:id/review", async (req, res) => {
+    const { profile_id, status } = parse(reviewInput, req.body);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
+    const receipt = await repos.receipts.setReview(id, profile_id, status);
+    if (!receipt) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
+    res.json({ receipt });
   });
 
   api.post("/receipts/process", aiLimiter, upload.single("receipt_image"), async (req, res) => {

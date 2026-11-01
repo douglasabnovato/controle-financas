@@ -556,5 +556,6 @@ Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecos
 
 - Republicar a API no Render a partir da `main`.
 - Conferir se `/health` responde e se `/api/receipts` exige token.
+- Avaliar um cupom no site publicado e conferir o cartão "Leituras aceitas" no painel.
 
-Acompanhamento na issue #7.
+Acompanhamento nas issues #7 e #9.
