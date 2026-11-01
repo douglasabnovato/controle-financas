@@ -22,16 +22,18 @@ export default function DashboardSummary({ profileId, refreshTrigger }) {
   if (error) return <Notice kind="error">{error}</Notice>;
   if (!data) return <p role="status" className="text-sm text-gray-700">Carregando métricas financeiras…</p>;
 
+  const rate = data.reading_review?.acceptance_rate;
   const cards = [
     { label: 'Total de cupons', value: data.summary.total_receipts, tone: 'bg-blue-50 border-blue-100 text-blue-900' },
     { label: 'Total gasto', value: formatBRL(data.summary.total_spent), tone: 'bg-green-50 border-green-100 text-green-900' },
     { label: 'Ticket médio', value: formatBRL(data.summary.average_ticket), tone: 'bg-purple-50 border-purple-100 text-purple-900' },
+    { label: 'Leituras aceitas', value: rate == null ? 'Sem avaliação' : `${rate}%`, tone: 'bg-amber-50 border-amber-100 text-amber-900' },
   ];
 
   return (
     <section aria-labelledby="dash-title" className="space-y-6">
       <h2 id="dash-title" className="sr-only">Resumo</h2>
-      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <div key={c.label} className={`rounded-xl border p-4 ${c.tone}`}>
             <dt className="text-xs font-semibold uppercase">{c.label}</dt>

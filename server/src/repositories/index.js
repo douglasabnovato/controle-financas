@@ -16,6 +16,7 @@ function toReceipt(r) {
     purchase_date: r.purchase_date,
     total_amount: num(r.total_amount),
     document_type: r.document_type,
+    review_status: r.review_status ?? null,
     created_at: r.created_at,
   };
 }
@@ -104,6 +105,14 @@ function createRepositories(pool) {
           products: products.rows.map((p) => ({ ...p, quantity: num(p.quantity), unit_price: num(p.unit_price), total_price: num(p.total_price) })),
         };
       },
+      /* Marca a leitura como aceita ou corrigida; devolve null se o cupom não for do perfil */
+      async setReview(id, profileId, status) {
+        const { rows } = await pool.query(
+          "UPDATE receipts SET review_status = $1 WHERE id = $2 AND profile_id = $3 RETURNING *",
+          [status, id, profileId]
+        );
+        return rows[0] ? toReceipt(rows[0]) : null;
+      },
       async summary(profileId) {
         const totals = await pool.query(
           `SELECT count(id)::int AS total_receipts, coalesce(sum(total_amount), 0) AS total_spent,
@@ -116,10 +125,19 @@ function createRepositories(pool) {
            FROM receipts WHERE profile_id = $1 GROUP BY store_name ORDER BY spent_at_store DESC LIMIT 10`,
           [profileId]
         );
+        const reviews = await pool.query(
+          `SELECT count(*) FILTER (WHERE review_status = 'accepted')::int AS accepted,
+                  count(*) FILTER (WHERE review_status = 'corrected')::int AS corrected
+           FROM receipts WHERE profile_id = $1`,
+          [profileId]
+        );
+        const { accepted, corrected } = reviews.rows[0];
+        const reviewed = accepted + corrected;
         const t = totals.rows[0];
         return {
           summary: { total_receipts: t.total_receipts, total_spent: num(t.total_spent), average_ticket: Math.round(num(t.average_ticket) * 100) / 100 },
           top_stores: stores.rows.map((s) => ({ ...s, spent_at_store: num(s.spent_at_store) })),
+          reading_review: { accepted, corrected, acceptance_rate: reviewed ? Math.round((accepted / reviewed) * 100) : null },
         };
       },
     },

@@ -17,6 +17,8 @@ const profileInput = z.object({
 
 const profileQuery = z.object({ profile_id: z.string().uuid() });
 
+const reviewInput = z.object({ profile_id: z.string().uuid(), status: z.enum(["accepted", "corrected"]) });
+
 const extractedReceipt = z.object({
   store_name: z.string().trim().min(1).max(255),
   cnpj: z.string().trim().max(50).nullable().optional().transform((v) => (v ? v : null)),
@@ -36,5 +38,6 @@ const extractedReceipt = z.object({
     .default([]),
 });
 
-module.exports = { userInput, profileInput, profileQuery, extractedReceipt };
+module.exports = { userInput, profileInput, profileQuery,
+  reviewInput, extractedReceipt };
 /* Fim de schemas.js */

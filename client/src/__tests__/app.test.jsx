@@ -6,7 +6,7 @@ import { formatBRL, formatQty } from '../utils/format';
 
 vi.mock('../services/api', async () => {
   const actual = await vi.importActual('../services/api');
-  return { ...actual, default: { get: vi.fn(), post: vi.fn() } };
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn() } };
 });
 const { default: api } = await import('../services/api');
 const { default: ReceiptsList } = await import('../pages/ReceiptsList');
@@ -49,6 +49,19 @@ describe('ReceiptsList', () => {
     expect(api.get).toHaveBeenLastCalledWith('/receipts/1', { params: { profile_id: 'p1' } });
     await userEvent.keyboard('{Escape}');
     expect(screen.queryByRole('dialog')).toBeNull();
+  });
+});
+
+describe('Revisão da leitura', () => {
+  it('registra a leitura aceita, sem enviar dados do cupom', async () => {
+    api.get.mockResolvedValueOnce({ data: { receipts: [{ id: 1, code: 'C001', store_name: 'Mercado', purchase_date: '2026-09-10T10:00:00Z', total_amount: 10, document_type: 'cupom_fiscal' }] } });
+    api.get.mockResolvedValueOnce({ data: { receipt: { id: 1, code: 'C001', store_name: 'Mercado', purchase_date: '2026-09-10T10:00:00Z', total_amount: 10, cnpj: null }, products: [] } });
+    api.patch.mockResolvedValueOnce({ data: { receipt: { id: 1, review_status: 'accepted' } } });
+    render(<ReceiptsList profileId="p1" refreshTrigger={0} />);
+    await userEvent.click(await screen.findByRole('button', { name: /Detalhes do cupom C001/ }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Sim, sem correção' }));
+    expect(api.patch).toHaveBeenCalledWith('/receipts/1/review', { profile_id: 'p1', status: 'accepted' });
+    expect(await screen.findByText('Leitura aceita.')).toBeTruthy();
   });
 });
 
