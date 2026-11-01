@@ -551,3 +551,10 @@ Nesta etapa final, vamos estruturar os testes de garantia de qualidade (QA), val
 ## 👨‍💻 Autor / Desenvolvedor
 
 Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecossistema LearnTECH.
+
+## Próximos passos do responsável
+
+- Republicar a API no Render a partir da `main`.
+- Conferir se `/health` responde e se `/api/receipts` exige token.
+
+Acompanhamento na issue #7.
