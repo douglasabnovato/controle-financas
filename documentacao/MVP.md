@@ -17,9 +17,9 @@
 | 3 | Fluxo principal completo | Uma pessoa conclui sem ajuda | Parcial: implementado e testado; não exercitado em produção para não criar dados nem gastar cota |
 | 4 | Escopo enxuto | O que não entra está registrado | Parcial: insights e variação de preços estão no roadmap |
 | 5 | Medição de uso | A métrica principal é coletada | Parcial: leituras aceitas e corrigidas contadas no código e no painel; falta republicar a API (#9) |
-| 6 | Falhas tratadas | Erro, vazio e carregamento têm resposta clara | Parcial: há avisos na tela; casos da IA não revistos neste ciclo |
-| 7 | Desempenho aceitável | LCP de até 2,5 s no celular | Não medido neste ciclo |
-| 8 | Acessibilidade básica | Lighthouse e teclado | Não medido neste ciclo |
+| 6 | Falhas tratadas | Erro, vazio e carregamento têm resposta clara | Atende: envio, leitura da IA (indisponível, ilegível, incompleta), lista vazia e carregamento têm mensagem no código e nos testes |
+| 7 | Desempenho aceitável | LCP de até 2,5 s no celular | Atende na tela inicial: mediana de 1,55 s no site publicado (3 execuções), CLS 0 |
+| 8 | Acessibilidade básica | Lighthouse e teclado | Parcial: tela inicial com Lighthouse 100, axe sem violações e foco visível em todos os elementos alcançados por Tab (8 elementos); telas depois do login não testadas |
 | 9 | Segurança e conformidade | Riscos decididos; termos de terceiros cumpridos | Parcial: **a API publicada é anterior à `main`** (#7), o que é o maior risco aberto |
 | 10 | Entrega confiável | Publicação só depois de CI verde | Parcial: `main` sem proteção; o front é um build versionado em `docs/` |
 | 11 | Testes dos fluxos críticos | Testes automatizados no CI | Atende: 5 testes do cliente e 6 de integração no CI |
@@ -38,3 +38,7 @@
 ## 3. Fora do MVP
 
 Insights, variação de preços e múltiplos idiomas. A lista é uma proposta e pode mudar com a decisão do responsável.
+
+## Medições de 02/11/2026
+
+Mediana do LCP de 1,55 s (1,65, 1,55 e 1,49 s), desempenho 99, acessibilidade 100. Lighthouse 12.8.2 local, perfil móvel simulado, sem aparelho real.
