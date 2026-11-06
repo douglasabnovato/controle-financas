@@ -1,6 +1,6 @@
 /* Configuração de acesso: token da API, dados do usuário e primeira BU (ou uso de um perfil existente) */
-import { useState } from 'react';
-import api, { errorMessage, keys, storage } from '../services/api';
+import { useEffect, useState } from 'react';
+import api, { API_STATUS_TEXT, checkApiHealth, errorMessage, keys, storage } from '../services/api';
 import Notice from '../components/Notice';
 
 const FIELDS = [
@@ -17,6 +17,18 @@ export default function Home({ onLoginSuccess }) {
   const [formData, setFormData] = useState({ full_name: '', email: '', nickname: '', whatsapp: '', profile_name: 'Despesas Pessoais' });
   const [status, setStatus] = useState({ kind: 'info', text: '' });
   const [busy, setBusy] = useState(false);
+  const [apiStatus, setApiStatus] = useState(null);
+
+  /* Avisa logo na entrada se a API publicada não responde ou está desatualizada */
+  useEffect(() => {
+    let ativo = true;
+    checkApiHealth(api).then((resultado) => {
+      if (ativo) setApiStatus(resultado);
+    });
+    return () => {
+      ativo = false;
+    };
+  }, []);
 
   /* Salva o token e, se informado, usa um perfil já existente */
   function saveTokenAndMaybeProfile() {
@@ -55,6 +67,7 @@ export default function Home({ onLoginSuccess }) {
   return (
     <main className="mx-auto mt-10 max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Configurar acesso</h1>
+      {API_STATUS_TEXT[apiStatus] && <Notice kind="error">{API_STATUS_TEXT[apiStatus]}</Notice>}
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <label htmlFor="token" className="block text-sm font-medium text-gray-800">Token de acesso da API</label>

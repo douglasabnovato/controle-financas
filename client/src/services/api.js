@@ -50,5 +50,22 @@ export function errorMessage(error) {
   return 'Algo deu errado. Tente novamente.';
 }
 
+/* Confere a API publicada: 'ok', 'desatualizada' (sem /health) ou 'fora' (sem resposta) */
+export async function checkApiHealth(client = api) {
+  const base = (client?.defaults?.baseURL || import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/api\/?$/, '');
+  try {
+    const res = await client.get(`${base}/health`, { timeout: 15000 });
+    return res?.data?.status === 'ok' ? 'ok' : 'desatualizada';
+  } catch (error) {
+    if (error?.response?.status === 404) return 'desatualizada';
+    return 'fora';
+  }
+}
+
+export const API_STATUS_TEXT = {
+  fora: 'A API não respondeu. No plano gratuito ela pode levar cerca de 1 minuto para acordar. Tente de novo em instantes.',
+  desatualizada: 'A API publicada é uma versão antiga. O cadastro e o envio de cupons podem falhar nesta demonstração.',
+};
+
 export default api;
 /* Fim de api.js */
