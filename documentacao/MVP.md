@@ -59,4 +59,6 @@ Mediana do LCP de 1,55 s (1,65, 1,55 e 1,49 s), desempenho 99, acessibilidade 10
 | 10 | Parcial | `main` sem proteção; front versionado em `docs/` | #18, #19 |
 | 12 | Atende | README e este arquivo dizem que a API no ar é antiga, com issue | — |
 
+**Medição depois do merge (06/11/2026):** Lighthouse 12.8.2 local, móvel, no site publicado. Com o aviso da API no topo (PR #23), o aviso virou o elemento do LCP: 2,41 / 3,15 / 2,99 s (mediana 2,99 s). Com o aviso no fim do formulário (PR #25): 1,64 / 1,56 / 1,41 s (mediana 1,56 s), desempenho 98 a 100, acessibilidade 100, e o elemento do LCP voltou a ser o `h1`. O critério 7 segue "Atende".
+
 **Para "Finalizado":** atender 3, 4, 8 e 9, e ter issue `depende-do-responsavel` aberta para 2, 5 e 10. Hoje 3, 5 e 9 esperam a #7.
