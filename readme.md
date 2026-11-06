@@ -7,8 +7,32 @@
 ## 🌐 Em produção
 
 - Front: https://douglasabnovato.github.io/controle-financas/ (GitHub Pages, pasta `docs/` da `main`)
-- API: https://controle-financas-api-71f6.onrender.com (Render Free, `render.yaml`; dorme após 15 min sem uso) + PostgreSQL no Supabase
+- API: `controle-financas-api-71f6.onrender.com` (Render Free, `render.yaml`) + PostgreSQL no Supabase. **Em 06/11/2026, a versão no ar é anterior à `main`:** `/health` responde 404. O front abre, mas avisa isso na entrada, e o cadastro pode falhar. Republicar é do responsável (#7).
 - Passo a passo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md)
+
+---
+
+## Estado e próximos passos (ciclo de 03/11/2026)
+
+**O que foi feito**
+- A tela de entrada confere o `/health` da API e avisa se ela não respondeu ou se é uma versão antiga, com 4 testes (PR deste ciclo para a `developer/sprint-2026-11-12`).
+- O front publicado em `docs/` foi reconstruído com o aviso.
+- O resumo do [`documentacao/MVP.md`](documentacao/MVP.md) agora bate com a tabela (antes dizia 2 de 12; a tabela tinha 4).
+- O [`documentacao/PLANO-DE-ACAO.md`](documentacao/PLANO-DE-ACAO.md) ganhou a seção do ciclo, com pesquisa citada.
+- Antes: medições de LCP e acessibilidade da tela inicial (#17).
+
+**O que queremos fazer**
+- #7 Republicar a API a partir da `main` (responsável).
+- #9 Medir a taxa de aceite da leitura de cupons.
+- #18 Proteger a `main` com PR e CI obrigatórios (responsável).
+- #19 Publicar o front pelo GitHub Actions, sem build versionado.
+- #20 Testar a acessibilidade das telas depois do login.
+- #21 Orientar a foto do cupom e permitir reenviar.
+- #22 Confirmar a meta da hipótese (responsável).
+
+**Onde está a documentação**
+- Estado dos critérios: [`documentacao/MVP.md`](documentacao/MVP.md)
+- Plano do ciclo: [`documentacao/PLANO-DE-ACAO.md`](documentacao/PLANO-DE-ACAO.md)
 
 ---
 
@@ -558,4 +582,4 @@ Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecos
 - Conferir se `/health` responde e se `/api/receipts` exige token.
 - Avaliar um cupom no site publicado e conferir o cartão "Leituras aceitas" no painel.
 
-Acompanhamento nas issues #7 e #9.
+Acompanhamento nas issues #7, #9, #18 e #22.

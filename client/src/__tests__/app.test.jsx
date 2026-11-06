@@ -11,6 +11,8 @@ vi.mock('../services/api', async () => {
 const { default: api } = await import('../services/api');
 const { default: ReceiptsList } = await import('../pages/ReceiptsList');
 const { default: ReceiptUpload } = await import('../components/ReceiptUpload');
+const { default: Home } = await import('../pages/Home');
+const { checkApiHealth } = await import('../services/api');
 
 beforeEach(() => {
   cleanup();
@@ -75,6 +77,38 @@ describe('ReceiptUpload', () => {
     await userEvent.upload(screen.getByLabelText(/Foto do cupom/), file);
     await userEvent.click(screen.getByRole('button', { name: /Enviar e processar/ }));
     expect((await screen.findByRole('alert')).textContent).toMatch(/já foi cadastrado/);
+  });
+});
+
+describe('Estado da API na entrada', () => {
+  it('classifica a resposta do /health', async () => {
+    api.get.mockResolvedValueOnce({ data: { status: 'ok' } });
+    expect(await checkApiHealth(api)).toBe('ok');
+    api.get.mockRejectedValueOnce({ response: { status: 404 } });
+    expect(await checkApiHealth(api)).toBe('desatualizada');
+    api.get.mockRejectedValueOnce({ code: 'ECONNABORTED' });
+    expect(await checkApiHealth(api)).toBe('fora');
+    expect(api.get.mock.calls[0][0]).toMatch(/\/health$/);
+  });
+
+  it('avisa quando a API publicada é antiga', async () => {
+    api.get.mockRejectedValueOnce({ response: { status: 404 } });
+    render(<Home onLoginSuccess={() => {}} />);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/versão antiga/);
+  });
+
+  it('avisa quando a API não responde', async () => {
+    api.get.mockRejectedValueOnce({ message: 'Network Error' });
+    render(<Home onLoginSuccess={() => {}} />);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/não respondeu/);
+  });
+
+  it('não mostra aviso quando a API está no ar', async () => {
+    api.get.mockResolvedValueOnce({ data: { status: 'ok' } });
+    render(<Home onLoginSuccess={() => {}} />);
+    await screen.findByRole('heading', { name: 'Configurar acesso' });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(screen.queryByRole('alert')).toBeNull();
   });
 });
 /* Fim de app.test.jsx */
