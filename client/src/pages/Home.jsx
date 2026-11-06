@@ -67,7 +67,6 @@ export default function Home({ onLoginSuccess }) {
   return (
     <main className="mx-auto mt-10 max-w-md rounded-xl border border-gray-200 bg-white p-6 shadow-md">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Configurar acesso</h1>
-      {API_STATUS_TEXT[apiStatus] && <Notice kind="error">{API_STATUS_TEXT[apiStatus]}</Notice>}
       <form onSubmit={handleSubmit} className="space-y-4" noValidate>
         <div>
           <label htmlFor="token" className="block text-sm font-medium text-gray-800">Token de acesso da API</label>
@@ -93,6 +92,8 @@ export default function Home({ onLoginSuccess }) {
           {busy ? 'Aguarde…' : 'Entrar'}
         </button>
         <Notice kind={status.kind}>{status.text}</Notice>
+        {/* Fica no fim do formulário: no topo, o aviso que chega depois virava o LCP da página */}
+        {API_STATUS_TEXT[apiStatus] && <Notice kind="error">{API_STATUS_TEXT[apiStatus]}</Notice>}
       </form>
     </main>
   );
