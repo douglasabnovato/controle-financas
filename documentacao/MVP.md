@@ -25,7 +25,7 @@
 | 11 | Testes dos fluxos críticos | Testes automatizados no CI | Atende: 5 testes do cliente e 6 de integração no CI |
 | 12 | Documentação honesta | Qualquer pessoa roda o projeto, e os números estão certos | Parcial: README correto para a `main`, não para a API publicada |
 
-**Resultado:** 2 de 12 critérios atendidos por inteiro. É um julgamento técnico.
+**Resultado em 31/10/2026:** 4 de 12 critérios atendidos (1, 6, 7 e 11). O texto anterior dizia 2 de 12 e não batia com a tabela; corrigido em 06/11/2026.
 
 ## 2. Tarefas
 
@@ -42,3 +42,21 @@ Insights, variação de preços e múltiplos idiomas. A lista é uma proposta e 
 ## Medições de 02/11/2026
 
 Mediana do LCP de 1,55 s (1,65, 1,55 e 1,49 s), desempenho 99, acessibilidade 100. Lighthouse 12.8.2 local, perfil móvel simulado, sem aparelho real.
+
+## Revisão de 06/11/2026 (ciclo de 03/11/2026)
+
+**Nível:** Vitrine (N2), 12 critérios. **Resumo:** 5 de 12 atendidos (1, 6, 7, 11 e 12) e 7 parciais (2, 3, 4, 5, 8, 9 e 10). **Finalizado:** não.
+
+| # | Situação em 06/11/2026 | Evidência ou o que falta | Issue |
+|---|---|---|---|
+| 2 | Parcial | Meta proposta, sem decisão do responsável | #22 |
+| 3 | Parcial | O front abre (200), mas a API publicada é antiga: `/health` responde 404 | #7 |
+| 4 | Parcial | Insights e variação de preços seguem no roadmap, fora do MVP | — |
+| 5 | Parcial | Contagem de leituras no código; sem dados até a API atual entrar no ar | #9 |
+| 6 | Atende | Além do que já havia, a entrada avisa quando a API não responde ou é antiga (4 testes em `client/src/__tests__/app.test.jsx`) | — |
+| 8 | Parcial | Telas depois do login sem axe nem teclado | #20 |
+| 9 | Parcial | A API publicada é anterior à `main` | #7 |
+| 10 | Parcial | `main` sem proteção; front versionado em `docs/` | #18, #19 |
+| 12 | Atende | README e este arquivo dizem que a API no ar é antiga, com issue | — |
+
+**Para "Finalizado":** atender 3, 4, 8 e 9, e ter issue `depende-do-responsavel` aberta para 2, 5 e 10. Hoje 3, 5 e 9 esperam a #7.
