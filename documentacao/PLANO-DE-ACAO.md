@@ -73,3 +73,56 @@ Timebox: 75 min (fullstack com IA).
 3. `MVP.md` com o resumo batendo com a tabela; README com estado e próximos passos.
 
 **Vira issue.** #7, #18, #19, #22 (responsável); #9, #20, #21 (agente).
+
+## Ciclo de 07/11/2026
+
+> Executado em 09/11/2026. Branch `feature/2026-11-07` → `developer/sprint-2026-11-12` → `main` (o PR para a `main` fica com o responsável). Nível: Vitrine (N2), 12 critérios.
+
+### Produto
+
+**Problema e público.** O mesmo do ciclo anterior: quem controla gastos envia a foto do cupom e recebe os itens catalogados.
+
+**Hipótese e meta.** Sem mudança: 80% de leituras aceitas sem correção. A meta é do responsável (#22); medir depende da API atual no ar (#7, #9).
+
+**O que a pesquisa trouxe.**
+
+| Ideia | O que levamos para o projeto | Fonte |
+|---|---|---|
+| Num diálogo modal, Tab e Shift+Tab não saem do diálogo; Esc fecha; o foco volta a quem abriu | O detalhe do cupom passou a prender o Tab entre os próprios botões (já fechava com Esc e devolvia o foco) | [WAI-ARIA APG: Dialog (Modal) Pattern](https://www.w3.org/WAI/ARIA/apg/patterns/dialog-modal/) |
+| Guias de apps de recibos repetem três cuidados: papel plano, cupom inteiro no quadro, luz sem sombra; e oferecem "escanear de novo" quando a leitura falha | Três dicas na tela de envio e o botão "Enviar outra foto" quando a IA devolve ilegível ou incompleto (#21) | [Spark Receipt: dicas de digitalização](https://www.sparkreceipt.com/blog/receipt-scanning-tips/), [Expensify: problemas no SmartScan](https://help.expensify.com/articles/new-expensify/reports-and-expenses/Troubleshoot-SmartScan-Issues), [FlipperForce: dicas para a IA ler o recibo](https://help.flipperforce.com/en/articles/16654019-is-the-ai-having-trouble-reading-your-receipt-tips-for-a-perfect-scan) |
+| Alguns apps deixam a pessoa digitar loja, data e total quando a leitura falha | Fica para uma issue nova (correção manual da leitura) | [FlipperForce](https://help.flipperforce.com/en/articles/16654019-is-the-ai-having-trouble-reading-your-receipt-tips-for-a-perfect-scan) |
+
+**Backlog priorizado (impacto × esforço).**
+
+| Prioridade | Item | Impacto | Esforço | Destino |
+|---|---|---|---|---|
+| 1 | axe e teclado nas telas depois do login | Médio | Baixo | Este ciclo (#20) |
+| 2 | Foco preso no diálogo do detalhe | Médio | Baixo | Este ciclo |
+| 3 | Dicas de foto e "Enviar outra foto" | Médio | Baixo | Este ciclo (#21) |
+| 4 | `MVP.md` com uma tabela só | Alto | Baixo | Este ciclo |
+| 5 | Republicar a API, proteger a `main`, Pages por Actions, meta | Alto | Baixo | Responsável (#7, #18, #19, #22) |
+| 6 | Correção manual da leitura | Médio | Médio | Issue nova |
+| 7 | Teste de ponta a ponta do fluxo principal no navegador | Médio | Médio | Issue nova |
+
+**Fora do escopo.** Insights, variação de preços, vários idiomas, Supabase Auth, correção de perspectiva da imagem.
+
+### Engenharia
+
+**Arquitetura.** Sem mudança: React 19 + Vite + Tailwind com build em `docs/` (GitHub Pages); API Express no Render com PostgreSQL no Supabase e leitura pelo Gemini.
+
+**Riscos.**
+- A API publicada segue anterior à `main` (`/health` 404 em 09/11/2026). O botão "Enviar outra foto" depende do campo `code` do erro, que a `main` envia; a API antiga pode não enviar, e aí o botão só não aparece.
+- `docs/` foi reconstruída neste ciclo; só chega ao site com o merge na `main`.
+
+**Qualidade.**
+- Testes: 17 no cliente (7 novos em `client/src/__tests__/a11y.test.jsx`), os de integração da API no CI.
+- Acessibilidade: axe-core em `ReceiptUpload`, `ReceiptsList`, `ReceiptDialog` e `DashboardSummary`, sem violações. A regra de contraste fica desligada no jsdom, que não calcula cores.
+- Segurança: nenhuma mudança na API, nos segredos ou na hospedagem.
+
+**Definição de pronto.** `npm run lint`, `npm test` e `npm run build` no `client`; CI verde no PR para a sprint; `docs/` reconstruída; `MVP.md` com uma tabela só; README atualizado.
+
+### Plano de ação
+
+**Este ciclo executa.** Foco preso no detalhe; axe e teclado nas telas depois do login (#20); dicas de foto e reenvio (#21); `docs/` reconstruída; `MVP.md` reorganizado.
+
+**Vira issue.** #29 (correção manual da leitura) e #30 (teste de ponta a ponta no navegador). Seguem com o responsável: #7, #18, #19, #22.
