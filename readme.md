@@ -7,28 +7,32 @@
 ## 🌐 Em produção
 
 - Front: https://douglasabnovato.github.io/controle-financas/ (GitHub Pages, pasta `docs/` da `main`)
-- API: `controle-financas-api-71f6.onrender.com` (Render Free, `render.yaml`) + PostgreSQL no Supabase. **Em 06/11/2026, a versão no ar é anterior à `main`:** `/health` responde 404. O front abre, mas avisa isso na entrada, e o cadastro pode falhar. Republicar é do responsável (#7).
+- API: `controle-financas-api-71f6.onrender.com` (Render Free, `render.yaml`) + PostgreSQL no Supabase. **Em 09/11/2026, a versão no ar segue anterior à `main`:** `/health` responde 404. O front abre, mas avisa isso na entrada, e o cadastro pode falhar. Republicar é do responsável (#7).
 - Passo a passo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md)
 
 ---
 
-## Estado e próximos passos (ciclo de 03/11/2026)
+## Estado e próximos passos (ciclo de 07/11/2026)
 
-**O que foi feito**
-- A tela de entrada confere o `/health` da API e avisa se ela não respondeu ou se é uma versão antiga, com 4 testes (PR deste ciclo para a `developer/sprint-2026-11-12`).
-- O front publicado em `docs/` foi reconstruído com o aviso.
-- O resumo do [`documentacao/MVP.md`](documentacao/MVP.md) agora bate com a tabela (antes dizia 2 de 12; a tabela tinha 4).
-- O [`documentacao/PLANO-DE-ACAO.md`](documentacao/PLANO-DE-ACAO.md) ganhou a seção do ciclo, com pesquisa citada.
-- Antes: medições de LCP e acessibilidade da tela inicial (#17).
+**Estado:** 7 de 12 critérios atendidos; **Finalizado: sim**, porque os 5 parciais dependem do responsável. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
 
-**O que queremos fazer**
+**O que foi feito neste ciclo** (PR para a `developer/sprint-2026-11-12`; a `main` espera a revisão do responsável)
+- Testes com axe-core nas telas depois do login (envio, catálogo, detalhe e painel), sem violações, e teste de teclado no detalhe (#20).
+- O detalhe do cupom prende o Tab entre os próprios botões, como pede o padrão de diálogo modal da WAI-ARIA.
+- A tela de envio mostra 3 dicas de foto e oferece "Enviar outra foto" quando a IA não lê o cupom (#21).
+- `docs/` reconstruída com essas mudanças; chega ao site com o merge na `main`.
+- [`documentacao/MVP.md`](documentacao/MVP.md) com uma tabela só, a atual; as anteriores foram para "Histórico".
+
+**Ciclo anterior (03/11/2026):** aviso de API fora ou antiga na entrada e medições de LCP.
+
+**Próximos passos**
 - #7 Republicar a API a partir da `main` (responsável).
 - #9 Medir a taxa de aceite da leitura de cupons.
 - #18 Proteger a `main` com PR e CI obrigatórios (responsável).
-- #19 Publicar o front pelo GitHub Actions, sem build versionado.
-- #20 Testar a acessibilidade das telas depois do login.
-- #21 Orientar a foto do cupom e permitir reenviar.
+- #19 Publicar o front pelo GitHub Actions, sem build versionado (responsável).
 - #22 Confirmar a meta da hipótese (responsável).
+- #29 Corrigir loja, data e total quando a leitura da IA erra.
+- #30 Testar o fluxo principal de ponta a ponta no navegador.
 
 **Onde está a documentação**
 - Estado dos critérios: [`documentacao/MVP.md`](documentacao/MVP.md)
