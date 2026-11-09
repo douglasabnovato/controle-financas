@@ -38,6 +38,7 @@ export default function ReceiptUpload({ profileId, onUploadSuccess }) {
     const formData = new FormData();
     formData.append('receipt_image', file);
     formData.append('profile_id', profileId);
+    setCanRetake(false);
     try {
       setLoading(true);
       setStatus({ kind: 'info', text: 'Lendo o cupom com IA… isso leva alguns segundos.' });

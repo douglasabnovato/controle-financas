@@ -14,15 +14,15 @@
 |---|---|---|---|---|
 | 1 | Problema e público claros | Atende | Uma frase, em "Problema e hipótese" abaixo | — |
 | 2 | Hipótese a validar | Parcial | Meta de 80% proposta; confirmar é do responsável | #22 |
-| 3 | Fluxo principal completo | Parcial | No código, cadastro, envio, catálogo, detalhe e painel estão testados (`npm test` no `client`, 09/11/2026: 17 testes passam). No ar, a API é antiga: `curl https://controle-financas-api-71f6.onrender.com/health` deu 404 em 09/11/2026 | #7 |
+| 3 | Fluxo principal completo | Parcial | No código, cadastro, envio, catálogo, detalhe e painel estão testados (`npm test` no `client`, 09/11/2026: 18 testes passam). No ar, a API é antiga: `curl https://controle-financas-api-71f6.onrender.com/health` deu 404 em 09/11/2026 | #7 |
 | 4 | Escopo enxuto | Atende | O que fica fora está em "Fora do MVP" abaixo e em "Fora do escopo" no `PLANO-DE-ACAO.md` (insights, variação de preços, idiomas, Supabase Auth) | — |
 | 5 | Medição de uso | Parcial | Leituras aceitas e corrigidas contadas no código e no painel; sem dados até a API atual entrar no ar | #7, #9 |
-| 6 | Falhas tratadas | Atende | Envio, IA indisponível, ilegível ou incompleta, lista vazia, carregamento e API fora ou antiga têm mensagem e teste. Desde 09/11/2026, leitura ilegível ou incompleta oferece "Enviar outra foto" (2 testes em `client/src/__tests__/a11y.test.jsx`) | — |
+| 6 | Falhas tratadas | Atende | Envio, IA indisponível, ilegível ou incompleta, lista vazia, carregamento e API fora ou antiga têm mensagem e teste. Desde 09/11/2026, leitura ilegível ou incompleta oferece "Enviar outra foto" (3 testes em `client/src/__tests__/a11y.test.jsx`) | — |
 | 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 local, móvel, no site publicado, 06/11/2026: 1,64 / 1,56 / 1,41 s (mediana 1,56 s), elemento do LCP é o `h1`. A tela inicial não mudou neste ciclo | — |
 | 8 | Acessibilidade básica | Atende | Tela inicial: Lighthouse 100 e axe sem violações (02/11/2026). Telas depois do login: `npm test` no `client`, 09/11/2026, axe-core sem violações em `ReceiptUpload`, `ReceiptsList`, `ReceiptDialog` e `DashboardSummary`; o detalhe abre com Enter, prende o Tab, fecha com Esc e devolve o foco (teste de teclado). Limite: o jsdom não calcula contraste; as telas usam as mesmas cores da tela inicial | — |
 | 9 | Segurança e conformidade | Parcial | Token em todas as rotas `/api` e saída da IA validada na `main`; a API publicada é anterior à `main` | #7 |
 | 10 | Entrega confiável | Parcial | `main` sem proteção; o front é um build versionado em `docs/` | #18, #19 |
-| 11 | Testes dos fluxos críticos | Atende | `npm test` no `client`, 09/11/2026: 17 testes passam (2 arquivos). Integração da API com PostgreSQL no job `server` do CI | — |
+| 11 | Testes dos fluxos críticos | Atende | `npm test` no `client`, 09/11/2026: 18 testes passam (2 arquivos). Integração da API com PostgreSQL no job `server` do CI | — |
 | 12 | Documentação honesta | Atende | README e este arquivo dizem que a API no ar é antiga, com issue; uma tabela só, resumo batendo com ela | — |
 
 ## Problema e hipótese

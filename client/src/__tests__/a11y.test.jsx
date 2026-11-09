@@ -97,6 +97,18 @@ describe('Reenvio quando a IA não lê o cupom', () => {
     expect(screen.getByRole('button', { name: /Enviar e processar/ }).disabled).toBe(true);
   });
 
+  it('esconde "Enviar outra foto" ao reenviar a mesma foto com sucesso', async () => {
+    api.post.mockRejectedValueOnce({ response: { status: 422, data: { error: 'O cupom foi lido, mas os dados vieram incompletos. Tente outra foto.', code: 'AI_INVALID' } } });
+    api.post.mockResolvedValueOnce({ data: { receipt: { code: 'C002', store_name: 'Padaria', total_amount: 5 } } });
+    render(<ReceiptUpload profileId="p1" />);
+    await userEvent.upload(screen.getByLabelText(/Foto do cupom/), new File(['x'], 'cupom.png', { type: 'image/png' }));
+    await userEvent.click(screen.getByRole('button', { name: /Enviar e processar/ }));
+    await screen.findByRole('button', { name: 'Enviar outra foto' });
+    await userEvent.click(screen.getByRole('button', { name: /Enviar e processar/ }));
+    expect((await screen.findByRole('status')).textContent).toMatch(/C002 salvo/);
+    expect(screen.queryByRole('button', { name: 'Enviar outra foto' })).toBeNull();
+  });
+
   it('não oferece reenvio quando o erro não é de leitura', async () => {
     api.post.mockRejectedValueOnce({ response: { status: 409, data: { error: 'Este cupom já foi cadastrado neste perfil.', code: 'DUPLICATE' } } });
     render(<ReceiptUpload profileId="p1" />);

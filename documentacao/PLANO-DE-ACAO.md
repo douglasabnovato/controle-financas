@@ -115,7 +115,7 @@ Timebox: 75 min (fullstack com IA).
 - `docs/` foi reconstruída neste ciclo; só chega ao site com o merge na `main`.
 
 **Qualidade.**
-- Testes: 17 no cliente (7 novos em `client/src/__tests__/a11y.test.jsx`), os de integração da API no CI.
+- Testes: 18 no cliente (8 novos em `client/src/__tests__/a11y.test.jsx`), os de integração da API no CI.
 - Acessibilidade: axe-core em `ReceiptUpload`, `ReceiptsList`, `ReceiptDialog` e `DashboardSummary`, sem violações. A regra de contraste fica desligada no jsdom, que não calcula cores.
 - Segurança: nenhuma mudança na API, nos segredos ou na hospedagem.
 
