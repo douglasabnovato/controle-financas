@@ -1,6 +1,6 @@
 # CI do monorepo: API com PostgreSQL de serviço, front com testes, lint e build, e o fluxo principal
 # no navegador (Playwright + axe) com a API real. Na main, publica o client/dist no GitHub Pages
-# só quando a variável PAGES_VIA_ACTIONS for "true" e VITE_API_URL estiver definida (depois de trocar a fonte do Pages para GitHub Actions).
+# só quando a variável PAGES_VIA_ACTIONS for "true" (depois de trocar a fonte do Pages para GitHub Actions).
 name: CI
 on:
   push:
@@ -49,11 +49,10 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
+      # A URL da API vem de client/.env.production (versionado, sem segredo)
       - run: npm run build -- --outDir dist --emptyOutDir
-        env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true' && vars.VITE_API_URL != ''
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
         with: { path: client/dist }
   e2e:
     runs-on: ubuntu-latest
@@ -86,7 +85,7 @@ jobs:
         working-directory: client
   deploy:
     needs: [server, client, e2e]
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true' && vars.VITE_API_URL != ''
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
     runs-on: ubuntu-latest
     permissions:
       pages: write
