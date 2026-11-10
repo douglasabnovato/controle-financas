@@ -1,8 +1,11 @@
-# CI do monorepo: API com PostgreSQL de serviço e front com testes, lint e build
+# CI do monorepo: API com PostgreSQL de serviço, front com testes, lint e build, e o fluxo principal
+# no navegador (Playwright + axe) com a API real. Na main, publica o client/dist no GitHub Pages
+# só quando a variável PAGES_VIA_ACTIONS for "true" (depois de trocar a fonte do Pages para GitHub Actions).
 name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -46,4 +49,55 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm test
-      - run: npm run build
+      # A URL da API vem de client/.env.production (versionado, sem segredo)
+      - run: npm run build -- --outDir dist --emptyOutDir
+      - uses: actions/upload-pages-artifact@v3
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
+        with: { path: client/dist }
+  e2e:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      E2E_DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            client/package-lock.json
+      - run: npm ci
+        working-directory: server
+      - run: npm ci
+        working-directory: client
+      - run: npx playwright install --with-deps chromium
+        working-directory: client
+      - run: npm run test:e2e
+        working-directory: client
+  deploy:
+    needs: [server, client, e2e]
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.PAGES_VIA_ACTIONS == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/configure-pages@v5
+      - id: deployment
+        uses: actions/deploy-pages@v4
+# fim de arquivo
