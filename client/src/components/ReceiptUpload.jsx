@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import api, { errorMessage } from '../services/api';
 import Notice from './Notice';
 import { formatBRL } from '../utils/format';
+import { registrarEvento } from '../lib/medicao';
 
 /* Erros de leitura da IA que uma foto melhor costuma resolver */
 const RETAKE_CODES = ['AI_UNREADABLE', 'AI_INVALID'];
@@ -44,6 +45,7 @@ export default function ReceiptUpload({ profileId, onUploadSuccess }) {
       setStatus({ kind: 'info', text: 'Lendo o cupom com IA… isso leva alguns segundos.' });
       const { data } = await api.post('/receipts/process', formData);
       setStatus({ kind: 'success', text: `Cupom ${data.receipt.code} salvo: ${data.receipt.store_name}, ${formatBRL(data.receipt.total_amount)}.` });
+      registrarEvento('enviar-cupom');
       setFile(null);
       setPreview(null);
       onUploadSuccess?.(data);

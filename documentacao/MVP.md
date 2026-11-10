@@ -4,32 +4,34 @@
 
 **Nível:** Vitrine (N2), 12 critérios.
 
-**Resumo:** 7 de 12 aplicáveis atendidos (1, 4, 6, 7, 8, 11 e 12). Os 5 parciais (2, 3, 5, 9 e 10) dependem do responsável. No 10, a `main` está protegida desde 10/11/2026; falta só publicar o front pelo Actions (#19).
+**Resumo:** 8 de 12 aplicáveis atendidos
 
-**Finalizado:** sim (todos os critérios que o código resolve estão em "Atende"; os que dependem do responsável têm issue com `depende-do-responsavel`: #7, #19 e #22).
+**Finalizado:** sim — faltam 3, 5, 9 e 10, que dependem do responsável: republicar a API no Render (#7), trocar a fonte do Pages para GitHub Actions (#19) e criar a conta do GoatCounter (#35)
 
-## Critérios em 10/11/2026 (ciclo de 07/11/2026)
+## Critérios em 10/11/2026 (ciclo da faixa de 90%, decisões D1 a D7 em `engenharia/decisoes/2026-11-10-ciclo-faixa-90.md`)
 
 | # | Critério | Situação | Evidência (comando, data, resultado) ou o que falta | Issue |
 |---|---|---|---|---|
 | 1 | Problema e público claros | Atende | Uma frase, em "Problema e hipótese" abaixo | — |
-| 2 | Hipótese a validar | Parcial | Meta de 80% proposta; confirmar é do responsável | #22 |
-| 3 | Fluxo principal completo | Parcial | No código, cadastro, envio, catálogo, detalhe e painel estão testados (`npm test` no `client`, 09/11/2026: 18 testes passam). No ar, a API é antiga: `curl https://controle-financas-api-71f6.onrender.com/health` deu 404 em 09/11/2026 | #7 |
+| 2 | Hipótese a validar | Atende | Meta decidida pelo coordenador em 10/11/2026 (decisão D1), revisável pelo responsável: 80% dos cupons aceitos sem corrigir o total (abaixo) | #22 |
+| 3 | Fluxo principal completo | Parcial | No navegador, com a API real: `npm run test:e2e` no job `e2e` do CI, 10/11/2026 (run 42811414874): 1 passed, percorrendo entrada, envio do cupom, catálogo, detalhe pelo teclado, avaliação e Esc (PostgreSQL de serviço, leitura da IA simulada). No ar, a API é antiga: `curl https://controle-financas-api-71f6.onrender.com/health`, 10/11/2026: 404 (`Cannot GET /health`) | #7 (responsável); validação com pessoa de fora: #36 |
 | 4 | Escopo enxuto | Atende | O que fica fora está em "Fora do MVP" abaixo e em "Fora do escopo" no `PLANO-DE-ACAO.md` (insights, variação de preços, idiomas, Supabase Auth) | — |
-| 5 | Medição de uso | Parcial | Leituras aceitas e corrigidas contadas no código e no painel; sem dados até a API atual entrar no ar | #7, #9 |
-| 6 | Falhas tratadas | Atende | Envio, IA indisponível, ilegível ou incompleta, lista vazia, carregamento e API fora ou antiga têm mensagem e teste. Desde 09/11/2026, leitura ilegível ou incompleta oferece "Enviar outra foto" (3 testes em `client/src/__tests__/a11y.test.jsx`) | — |
-| 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 local, móvel, no site publicado, 06/11/2026: 1,64 / 1,56 / 1,41 s (mediana 1,56 s), elemento do LCP é o `h1`. A tela inicial não mudou neste ciclo | — |
-| 8 | Acessibilidade básica | Atende | Tela inicial: Lighthouse 100 e axe sem violações (02/11/2026). Telas depois do login: `npm test` no `client`, 09/11/2026, axe-core sem violações em `ReceiptUpload`, `ReceiptsList`, `ReceiptDialog` e `DashboardSummary`; o detalhe abre com Enter, prende o Tab, fecha com Esc e devolve o foco (teste de teclado). Limite: o jsdom não calcula contraste; as telas usam as mesmas cores da tela inicial | — |
-| 9 | Segurança e conformidade | Parcial | Token em todas as rotas `/api` e saída da IA validada na `main`; a API publicada é anterior à `main` | #7 |
-| 10 | Entrega confiável | Parcial | `gh api repos/douglasabnovato/controle-financas/rulesets`, 10/11/2026: ruleset `principal-protegida` ativo (exige PR, bloqueia force push e exclusão); o workflow `CI` (jobs `server` e `client`) roda em todo PR. Falta: o front é um build versionado em `docs/`, que vai ao ar sem passar pelo build do CI | #19 |
-| 11 | Testes dos fluxos críticos | Atende | `npm test` no `client`, 09/11/2026: 18 testes passam (2 arquivos). Integração da API com PostgreSQL no job `server` do CI | — |
-| 12 | Documentação honesta | Atende | README e este arquivo dizem que a API no ar é antiga, com issue; uma tabela só, resumo batendo com ela | — |
+| 5 | Medição de uso | Parcial | Código pronto; falta a conta (decisão D5). GoatCounter sem cookie (`client/src/lib/medicao.js`), só no build de produção fora de localhost, com o evento `enviar-cupom`; `npx vitest run`, 10/11/2026: 22 de 22, incluindo `medicao.test.js`. A taxa de aceite da leitura (meta do 2) é contada no painel, sem dados até a API atual entrar no ar | #35 (responsável), #7, #9 |
+| 6 | Falhas tratadas | Atende | Envio, IA indisponível, ilegível ou incompleta, lista vazia, carregamento e API fora ou antiga têm mensagem e teste (`npx vitest run`, 10/11/2026: 22 de 22) | — |
+| 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 móvel no site publicado (`npx lighthouse https://douglasabnovato.github.io/controle-financas/`), 10/11/2026, 4 execuções válidas: LCP 1,55 / 2,53 / 1,43 / 1,45 s (mediana 1,50 s), TBT 84 / 56 / 51 / 229 ms, elemento do LCP `main > h1` ("Configurar acesso") | — |
+| 8 | Acessibilidade básica | Atende | No navegador (Chromium, 1280 px), `npm run test:e2e`, 10/11/2026: axe sem violações, com contraste, na entrada, no painel com o catálogo vazio e no detalhe; detalhe aberto com Enter e fechado com Esc, com o foco de volta no botão. No jsdom, axe nas telas depois do login (`a11y.test.jsx`) | — |
+| 9 | Segurança e conformidade | Parcial | Na `main`: token em todas as rotas `/api`, saída da IA validada, `npm audit --omit=dev` 0 vulnerabilidades em `client` e `server` (10/11/2026); dados de teste fictícios (`example.com`). A API publicada é anterior à `main` | #7 (responsável) |
+| 10 | Entrega confiável | Parcial | `gh api repos/douglasabnovato/controle-financas/rules/branches/main`, 10/11/2026: `required_status_checks` (`client` e `server`), além de PR obrigatório e bloqueio de force push e exclusão. O CI já tem a publicação do `client/dist` no Pages, travada por `PAGES_VIA_ACTIONS`. Falta: o site ainda sai da pasta `docs/`, que vai ao ar sem passar pelo CI | #19 (responsável) |
+| 11 | Testes dos fluxos críticos | Atende | CI do PR do ciclo: `client` (22 testes Vitest), `server` (integração com PostgreSQL) e `e2e` (Playwright com a API real), sem `skip` | — |
+| 12 | Documentação honesta | Atende | README e este arquivo dizem que a API no ar é antiga e que o site sai de `docs/`, com issues; uma tabela só, resumo batendo com ela | — |
+
+**Atendidos:** 1, 2, 4, 6, 7, 8, 11 e 12. **Parciais:** 3, 5, 9 e 10, todos à espera do responsável.
 
 ## Problema e hipótese
 
 **Problema e público:** Quem controla gastos da casa ou de um negócio envia a foto de um cupom fiscal e recebe os itens catalogados, sem digitar.
 
-**Hipótese:** Em 80% dos cupons enviados, a pessoa aceita a leitura da IA sem corrigir o total. Proposta inicial, para o responsável confirmar ou trocar (#22). Sem medição, a meta ainda não pode ser conferida.
+**Hipótese (meta do ciclo, texto da proposta mantido):** Em 80% dos cupons enviados, a pessoa aceita a leitura da IA sem corrigir o total. Meta decidida pelo coordenador em 10/11/2026 (decisão D1), revisável pelo responsável (#22). Saberemos pelo painel do app (aceitas e corrigidas) depois que a API atual estiver no ar (#7, #9).
 
 ## Próximas tarefas
 
@@ -42,6 +44,10 @@
 Insights, variação de preços e múltiplos idiomas. A lista é uma proposta e pode mudar com a decisão do responsável.
 
 ## Histórico
+
+### Estado de 10/11/2026, antes do ciclo da faixa de 90%
+
+**Resumo:** 7 de 12 aplicáveis atendidos (1, 4, 6, 7, 8, 11 e 12). **Finalizado:** sim. Diferenças para a tabela atual: o 2 estava "Parcial" (meta sem decisão); o 3 não tinha teste no navegador com a API real; o 5 não tinha a medição de visitas; o 10 não exigia os jobs do CI na `main`.
 
 ### Revisão de 06/11/2026 (ciclo de 03/11/2026)
 
