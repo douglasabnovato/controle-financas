@@ -4,11 +4,11 @@
 
 **Nível:** Vitrine (N2), 12 critérios.
 
-**Resumo:** 7 de 12 aplicáveis atendidos (1, 4, 6, 7, 8, 11 e 12). Os 5 parciais (2, 3, 5, 9 e 10) dependem do responsável.
+**Resumo:** 7 de 12 aplicáveis atendidos (1, 4, 6, 7, 8, 11 e 12). Os 5 parciais (2, 3, 5, 9 e 10) dependem do responsável. No 10, a `main` está protegida desde 10/11/2026; falta só publicar o front pelo Actions (#19).
 
-**Finalizado:** sim (todos os critérios que o código resolve estão em "Atende"; os que dependem do responsável têm issue com `depende-do-responsavel`: #7, #18, #19 e #22).
+**Finalizado:** sim (todos os critérios que o código resolve estão em "Atende"; os que dependem do responsável têm issue com `depende-do-responsavel`: #7, #19 e #22).
 
-## Critérios em 09/11/2026 (ciclo de 07/11/2026)
+## Critérios em 10/11/2026 (ciclo de 07/11/2026)
 
 | # | Critério | Situação | Evidência (comando, data, resultado) ou o que falta | Issue |
 |---|---|---|---|---|
@@ -21,7 +21,7 @@
 | 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 local, móvel, no site publicado, 06/11/2026: 1,64 / 1,56 / 1,41 s (mediana 1,56 s), elemento do LCP é o `h1`. A tela inicial não mudou neste ciclo | — |
 | 8 | Acessibilidade básica | Atende | Tela inicial: Lighthouse 100 e axe sem violações (02/11/2026). Telas depois do login: `npm test` no `client`, 09/11/2026, axe-core sem violações em `ReceiptUpload`, `ReceiptsList`, `ReceiptDialog` e `DashboardSummary`; o detalhe abre com Enter, prende o Tab, fecha com Esc e devolve o foco (teste de teclado). Limite: o jsdom não calcula contraste; as telas usam as mesmas cores da tela inicial | — |
 | 9 | Segurança e conformidade | Parcial | Token em todas as rotas `/api` e saída da IA validada na `main`; a API publicada é anterior à `main` | #7 |
-| 10 | Entrega confiável | Parcial | `main` sem proteção; o front é um build versionado em `docs/` | #18, #19 |
+| 10 | Entrega confiável | Parcial | `gh api repos/douglasabnovato/controle-financas/rulesets`, 10/11/2026: ruleset `principal-protegida` ativo (exige PR, bloqueia force push e exclusão); o workflow `CI` (jobs `server` e `client`) roda em todo PR. Falta: o front é um build versionado em `docs/`, que vai ao ar sem passar pelo build do CI | #19 |
 | 11 | Testes dos fluxos críticos | Atende | `npm test` no `client`, 09/11/2026: 18 testes passam (2 arquivos). Integração da API com PostgreSQL no job `server` do CI | — |
 | 12 | Documentação honesta | Atende | README e este arquivo dizem que a API no ar é antiga, com issue; uma tabela só, resumo batendo com ela | — |
 

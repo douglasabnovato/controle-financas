@@ -14,7 +14,7 @@
 
 ## Estado e próximos passos (ciclo de 07/11/2026)
 
-**Estado:** 7 de 12 critérios atendidos; **Finalizado: sim**, porque os 5 parciais dependem do responsável. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
+**Estado:** 7 de 12 critérios atendidos; **Finalizado: sim**, porque os 5 parciais dependem do responsável. A `main` está protegida desde 10/11/2026 (ruleset `principal-protegida`); no critério 10 falta só publicar o front pelo Actions (#19). Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
 
 **O que foi feito neste ciclo** (PR para a `developer/sprint-2026-11-12`; a `main` espera a revisão do responsável)
 - Testes com axe-core nas telas depois do login (envio, catálogo, detalhe e painel), sem violações, e teste de teclado no detalhe (#20).
@@ -28,7 +28,7 @@
 **Próximos passos**
 - #7 Republicar a API a partir da `main` (responsável).
 - #9 Medir a taxa de aceite da leitura de cupons.
-- #18 Proteger a `main` com PR e CI obrigatórios (responsável).
+- #18 Proteger a `main`: feito em 10/11/2026; a issue fecha no merge da `main`.
 - #19 Publicar o front pelo GitHub Actions, sem build versionado (responsável).
 - #22 Confirmar a meta da hipótese (responsável).
 - #29 Corrigir loja, data e total quando a leitura da IA erra.
@@ -586,4 +586,4 @@ Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecos
 - Conferir se `/health` responde e se `/api/receipts` exige token.
 - Avaliar um cupom no site publicado e conferir o cartão "Leituras aceitas" no painel.
 
-Acompanhamento nas issues #7, #9, #18 e #22.
+Acompanhamento nas issues #7, #9, #19 e #22.
