@@ -27,6 +27,16 @@ describe('format', () => {
 });
 
 describe('ReceiptsList', () => {
+  it('mostra "Carregando cupons…" enquanto a API não responde', async () => {
+    let responder;
+    api.get.mockReturnValueOnce(new Promise((resolve) => { responder = resolve; }));
+    render(<ReceiptsList profileId="p1" refreshTrigger={0} />);
+    expect(screen.getByRole('status').textContent).toBe('Carregando cupons…');
+    responder({ data: { receipts: [] } });
+    expect(await screen.findByText(/Nenhum cupom cadastrado/)).toBeTruthy();
+    expect(screen.queryByText('Carregando cupons…')).toBeNull();
+  });
+
   it('mostra estado vazio', async () => {
     api.get.mockResolvedValue({ data: { receipts: [] } });
     render(<ReceiptsList profileId="p1" refreshTrigger={0} />);

@@ -16,4 +16,20 @@ export function formatDate(value) {
 export function formatQty(value) {
   return Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 3 });
 }
+/* "25,50", "R$ 1.234,56" ou "25.5" → número; null se não for um valor válido */
+export function parseBRL(text) {
+  let s = String(text ?? '').trim().replace(/^R\$\s*/, '').replace(/\s/g, '');
+  if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(s)) return null;
+  return Number(s);
+}
+
+/* "09/11/2026" → "2026-11-09"; null se a data não existir no calendário */
+export function parseBRDate(text) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(text ?? '').trim());
+  if (!m) return null;
+  const iso = `${m[3]}-${m[2]}-${m[1]}`;
+  const d = new Date(`${iso}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === iso ? iso : null;
+}
 /* Fim de format.js */

@@ -12,7 +12,7 @@ Colocar no ar, sem custo, um monorepo com front React (Vite) e API Express que g
 
 | Parte | Escolha | Alternativas |
 |---|---|---|
-| Front (`client/`) | **GitHub Pages servindo a pasta `docs/` da `main`** (como já era) | Pages por GitHub Actions: possível, mas o build não depende de segredo e já está versionado e em dia; mudar não traz ganho agora |
+| Front (`client/`) | **GitHub Pages pelo GitHub Actions** (job `deploy` do CI, depois de `server`, `client` e `e2e` verdes). Até a troca da fonte (#19), segue a pasta `docs/` da `main` | Pasta `docs/` versionada: vai ao ar sem passar pelo CI, por isso sai depois da troca (#40) |
 | API (`server/`) | **Render, Web Service gratuito (`render.yaml`)** | Railway/Fly exigem cartão ou têm crédito limitado; Vercel não roda Express com upload de forma simples |
 | Banco | **Supabase (PostgreSQL gratuito)** | Neon também serve; basta trocar a `DATABASE_URL` |
 
@@ -61,7 +61,8 @@ Colocar no ar, sem custo, um monorepo com front React (Vite) e API Express que g
   - `1-...bahamas-1.jpg`, `2-...bahamas-2.jpg`, `3-...bahamas-3.jpg` e `informacoes-importantes.jpg` mostram **nomes completos de operadores de caixa** e de gerentes, e os 4 últimos dígitos de cartões.
   - `4-` e `5-...bassamar` não têm dados pessoais (passageiro não identificado).
   - As fotos não são usadas pelo código nem pelos testes.
-  - Recomendação: tirar a pasta do Git (`git rm -r --cached assets/modelos`, mantendo os arquivos no seu computador e acrescentando `assets/modelos/` ao `.gitignore`) ou publicar só versões com nomes e endereço cobertos. O histórico do Git continua com as fotos; se o repositório já é público e isso preocupa, a limpeza do histórico (`git filter-repo`) é decisão sua.
+  - **Em 16/11/2026**, as 5 fotos com dados pessoais (`1-`, `2-`, `3-`, `6-` e `informacoes-importantes.jpg`) saíram da árvore. Ficaram `4-`, `5-` e `7-...pais-e-filhos` (consumidor não identificado). O histórico do Git ainda tem as 5 fotos: aceitar ou limpar é decisão do responsável (#43).
+  - Recomendação original: tirar a pasta do Git (`git rm -r --cached assets/modelos`, mantendo os arquivos no seu computador e acrescentando `assets/modelos/` ao `.gitignore`) ou publicar só versões com nomes e endereço cobertos. O histórico do Git continua com as fotos; se o repositório já é público e isso preocupa, a limpeza do histórico (`git filter-repo`) é decisão sua.
 - **Token:** o `API_TOKEN` fica salvo no navegador de quem usa o app. Não compartilhe a URL com o token nem use o mesmo token em outro serviço.
 - **Dados no banco:** os cupons guardam CNPJ do estabelecimento e itens comprados. Não envie cupons com CPF na nota se não quiser esse dado no banco.
 
@@ -94,23 +95,7 @@ Branch principal: **`main`**.
 
 ### Etapa 2 · Subir para o GitHub
 
-1. Remover os arquivos substituídos:
-   ```bash
-   cd /c/ambiente-projeto/ser-mvp/controle-financas
-   git rm -r server/src/controllers server/src/routes
-   git rm server/src/database/connection.js server/src/services/geminiService.js
-   git rm client/src/App.css client/src/assets/hero.png client/src/assets/react.svg client/src/assets/vite.svg
-   git rm docs/assets/index-D6EnjMIh.css docs/assets/index-bamriI8r.js
-   ```
-2. Ativar o CI:
-   ```bash
-   mkdir -p .github/workflows && mv ci/github-actions-ci.yml .github/workflows/ci.yml && rmdir ci
-   ```
-3. `git status` (não podem aparecer `server/.env` nem `node_modules/`; `docs/` deve ter só `index.html`, `favicon.svg`, `icons.svg`, `assets/index-B_dx3wcT.js` e `assets/index-D1SaPdD9.css`)
-4. `git add -A`
-5. `git commit -m "chore(deploy): Node 22 no Render e no CI, auto deploy e guia de publicação"`
-6. `git push origin main`
-7. Aba **Actions**: os jobs `server` e `client` precisam ficar verdes.
+Feito. A remoção dos arquivos antigos da API (`controllers/`, `routes/`, `database/connection.js`, `services/geminiService.js`) e dos arquivos do modelo do Vite entrou no ciclo de 16/11/2026. O CI está em `.github/workflows/ci.yml`, com os jobs `server`, `client`, `e2e` e `deploy`. Tudo entra na `main` por PR (fluxo `feature/AAAA-MM-DD` → `developer/sprint-<quinta>` → `main`), com `client`, `e2e` e `server` obrigatórios no ruleset da `main`.
 
 ### Etapa 3 · API no Render
 
@@ -125,10 +110,16 @@ Escolha **uma** das opções (decisão sua):
   3. Anotar a URL criada. Se for diferente de `https://controle-financas-api-71f6.onrender.com`, atualizar `client/.env.production` (`VITE_API_URL=https://<url>/api`), rodar `cd client && npm run build`, e fazer commit de `client/.env.production` e da pasta `docs/` (o nome do `.js` muda).
 4. Em ambos: acompanhar **Logs** até `API controle-financas na porta 10000`.
 
-### Etapa 4 · Front no GitHub Pages
+### Etapa 4 · Front no GitHub Pages pelo GitHub Actions (#19)
 
-1. **Settings → Pages → Build and deployment → Source: Deploy from a branch**, branch `main`, pasta **/docs**.
-2. Quando mudar algo no front: `cd client && npm run build` (grava em `../docs`), commit de `docs/` e push. O CI testa, mas quem publica é a pasta versionada.
+Em 16/11/2026, `gh api repos/douglasabnovato/controle-financas/pages` responde `build_type: legacy`, com a pasta `/docs` da `main`. A pasta vai ao ar sem passar pelo CI. O job `deploy` do CI já publica o `client/dist`, mas só quando a variável `PAGES_VIA_ACTIONS` é `true`. Passo a passo (responsável):
+
+1. **Settings → Pages → Build and deployment → Source**: trocar "Deploy from a branch" por **GitHub Actions**. Não é preciso escolher modelo de workflow: o `ci.yml` já publica ([GitHub Docs](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)).
+2. **Settings → Secrets and variables → Actions → aba Variables → New repository variable**: nome `PAGES_VIA_ACTIONS`, valor `true`.
+3. **Actions → CI → Run workflow**, branch `main`. Os jobs `server`, `client`, `e2e` e `deploy` terminam verdes.
+4. Conferir: `gh api repos/douglasabnovato/controle-financas/pages --jq .build_type` responde `workflow`, e o site abre a tela "Configurar acesso".
+
+Depois disso, o agente tira a pasta `docs/` e o `outDir: '../docs'` do `client/vite.config.js` por PR (#40). Até lá, quem muda o front roda `cd client && npm run build` (grava em `../docs`) e versiona a `docs/` no mesmo PR.
 
 ### Etapa 5 · Conferir no ar
 
@@ -136,6 +127,7 @@ Escolha **uma** das opções (decisão sua):
 2. `https://controle-financas-api-71f6.onrender.com/api/users/1` sem token responde 401 (a API exige o token em todas as rotas `/api`).
 3. Abrir `https://douglasabnovato.github.io/controle-financas/`, informar o `API_TOKEN`, criar o perfil e enviar a foto de um cupom: os itens aparecem no catálogo com código `C001`.
 4. DevTools → Console: nenhum erro de CORS. Enviar o mesmo cupom de novo: o app avisa que é duplicado.
+5. Abrir o detalhe, clicar em "Precisei corrigir", mudar o total e salvar: aparece "Correção salva.", e o catálogo e o painel mostram o valor novo (a rota `PATCH /api/receipts/:id` só existe na API atual, #7).
 
 ### Etapa 6 · Fechar
 

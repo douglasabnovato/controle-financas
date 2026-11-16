@@ -6,35 +6,36 @@
 
 ## 🌐 Em produção
 
-- Front: https://douglasabnovato.github.io/controle-financas/ (GitHub Pages, pasta `docs/` da `main`)
-- API: `controle-financas-api-71f6.onrender.com` (Render Free, `render.yaml`) + PostgreSQL no Supabase. **Em 10/11/2026, a versão no ar segue anterior à `main`:** `/health` responde 404. O front abre, mas avisa isso na entrada, e o cadastro pode falhar. Republicar é do responsável (#7).
+- Front: https://douglasabnovato.github.io/controle-financas/ (GitHub Pages, ainda pela pasta `docs/` da `main`; a troca para o GitHub Actions é do responsável, #19). Em 16/11/2026: 200, mesmo `index.html` da `docs/` da `main`.
+- API: `controle-financas-api-71f6.onrender.com` (Render Free, `render.yaml`) + PostgreSQL no Supabase. **Em 16/11/2026, a versão no ar segue anterior à `main`:** `/health` responde 404. O front abre, mas avisa isso na entrada, e o cadastro pode falhar. Republicar é do responsável (#7).
 - Passo a passo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md)
 
 ---
 
-## Estado e próximos passos (ciclo de 10/11/2026)
+## Estado e próximos passos (ciclo de 16/11/2026)
 
-**Estado:** 8 de 12 critérios atendidos; **Finalizado: sim**, porque os 4 parciais (3, 5, 9 e 10) dependem do responsável. A `main` só recebe PR com os jobs `client` e `server` do CI verdes. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
+**Estado:** 8 de 12 critérios atendidos; **Finalizado: sim**, porque os 4 parciais (3, 5, 9 e 10) dependem do responsável, cada um com issue. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
 
-**O que foi feito neste ciclo** (PR para a `developer/sprint-2026-11-12`; a `main` espera a revisão do responsável)
-- Teste de ponta a ponta no navegador (Playwright) com a API real e PostgreSQL: entrada, envio do cupom, catálogo, detalhe pelo teclado, avaliação e Esc, com axe (contraste incluso) em cada tela. Roda no job `e2e` do CI (#30).
-- Medição de uso sem cookie (GoatCounter, código `douglasabnovato`), só no site publicado, com o evento `enviar-cupom`. Falta a conta (#35).
-- O CI já publica o `client/dist` no Pages pelo Actions, travado pela variável `PAGES_VIA_ACTIONS` até a troca da fonte (#19). Até lá, o site segue saindo de `docs/`, reconstruída neste ciclo.
-- Meta da hipótese decidida no ciclo de 10/11/2026 (revisável, #22).
+**O que foi feito neste ciclo** (PR para a `developer/sprint-2026-11-19`; a `main` espera a revisão do responsável)
+- Correção da leitura: "Precisei corrigir" abre loja, data e total já preenchidos; a API (`PATCH /api/receipts/:id`) valida e só altera o cupom do perfil; catálogo e painel se atualizam (#29).
+- Fluxo principal no navegador só pelo teclado, com o foco visível do app conferido e axe em cada tela, mais o teste da correção (#30, #20).
+- Saíram o código antigo da API, que nada carregava e tinha rotas sem token, e 5 fotos de cupom com dados pessoais de terceiros (o histórico fica com o responsável, #43).
+- `MVP.md` conferido: critério 9 "Parcial" com os alertas do Dependabot desligados (#38); Lighthouse medido de novo no site publicado.
 
-**Ciclo anterior (07/11/2026):** axe nas telas depois do login, teclado no detalhe e dicas de foto com "Enviar outra foto".
+**Ciclos anteriores:** 10/11/2026 (PR #37: teste no navegador com a API real, medição sem cookie, deploy do Pages pronto no CI) e 07/11/2026 (PR #31: axe depois do login, dicas de foto e reenvio). Os dois entraram na `main` pelo PR #33.
 
 **Próximos passos**
 - #7 Republicar a API a partir da `main` (responsável).
-- #19 Trocar a fonte do Pages para GitHub Actions (responsável).
+- #19 Trocar a fonte do Pages para GitHub Actions (responsável); depois, #40 tirar a `docs/`.
 - #35 Criar a conta do GoatCounter (responsável).
-- #9 Medir a taxa de aceite da leitura de cupons, depois da #7.
-- #29 Corrigir loja, data e total quando a leitura da IA erra.
-- #36 Validar com uma pessoa de fora.
+- #38 Ligar os alertas do Dependabot (responsável).
+- #43 Decidir sobre as fotos com dados pessoais no histórico (responsável).
+- #9 Medir a taxa de aceite, #36 validar com uma pessoa de fora, #41 corrigir os itens do cupom, #42 testar no celular.
 
 **Onde está a documentação**
 - Estado dos critérios: [`documentacao/MVP.md`](documentacao/MVP.md)
 - Plano do ciclo: [`documentacao/PLANO-DE-ACAO.md`](documentacao/PLANO-DE-ACAO.md)
+- Publicação: [`documentacao/DEPLOY.md`](documentacao/DEPLOY.md)
 
 ---
 
@@ -58,6 +59,7 @@ TEST_DATABASE_URL=postgres://... npm test
 # Front
 cd client && npm install && npm run dev   # http://localhost:5173
 npm test && npm run build                 # build em ../docs (GitHub Pages)
+E2E_DATABASE_URL=postgres://... npm run test:e2e   # fluxo no navegador (Playwright + axe), Node 22; antes: npx playwright install chromium
 ```
 
 Na primeira tela, informe o mesmo `API_TOKEN` configurado na API. Deploy gratuito: API no Render (`render.yaml`), banco no Supabase, front no GitHub Pages. CI: `.github/workflows/ci.yml`. Guia completo: [documentacao/DEPLOY.md](documentacao/DEPLOY.md).
@@ -166,9 +168,10 @@ controle-financas/
 │   └── package.json
 ├── server/                 # Backend (Node.js + Express)
 │   ├── src/
-│   │   ├── controllers/    # Lógica de rotas (Cupons, Produtos, Usuários)
-│   │   ├── services/       # Integração com IA de extração e regras de ID
-│   │   └── database/       # Configuração e conexões com o PostgreSQL
+│   │   ├── app.js          # Rotas da API (Express 5), com token em /api
+│   │   ├── repositories/   # Consultas ao PostgreSQL
+│   │   ├── services/       # Leitura do cupom pelo Gemini, validada com zod
+│   │   └── db/             # schema.sql e migração
 │   └── package.json
 └── README.md
 ```
@@ -584,4 +587,4 @@ Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecos
 - Conferir se `/health` responde e se `/api/receipts` exige token.
 - Avaliar um cupom no site publicado e conferir o cartão "Leituras aceitas" no painel.
 
-Acompanhamento nas issues #7, #9, #19 e #22.
+Acompanhamento nas issues #7, #9, #19, #22, #35, #38 e #43.

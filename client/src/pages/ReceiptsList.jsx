@@ -1,13 +1,15 @@
 /* Catálogo de cupons do perfil com estados de carregando, erro, vazio e detalhe */
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import api, { errorMessage } from '../services/api';
 import Notice from '../components/Notice';
 import ReceiptDialog from '../components/ReceiptDialog';
 import { formatBRL, formatDate } from '../utils/format';
 
-export default function ReceiptsList({ profileId, refreshTrigger }) {
+export default function ReceiptsList({ profileId, refreshTrigger, onChange }) {
   const [state, setState] = useState({ loading: true, error: '', receipts: [] });
   const [detail, setDetail] = useState(null);
+  /* Estável: o diálogo refaz o efeito de foco quando onClose muda */
+  const closeDetail = useCallback(() => setDetail(null), []);
 
   const [reload, setReload] = useState(0);
 
@@ -43,9 +45,24 @@ export default function ReceiptsList({ profileId, refreshTrigger }) {
     try {
       const res = await api.patch(`/receipts/${detail.receipt.id}/review`, { profile_id: profileId, status });
       setDetail((d) => ({ ...d, receipt: { ...d.receipt, review_status: res.data.receipt.review_status } }));
+      onChange?.();
     } catch (err) {
       setDetail(null);
       setState((s) => ({ ...s, error: errorMessage(err) }));
+    }
+  }
+
+  /* Salva loja, data e total corrigidos (#29); devolve a mensagem de erro para o diálogo, ou '' */
+  async function handleCorrect(values) {
+    try {
+      const res = await api.patch(`/receipts/${detail.receipt.id}`, { profile_id: profileId, ...values });
+      const receipt = res.data.receipt;
+      setDetail((d) => ({ ...d, receipt: { ...d.receipt, ...receipt } }));
+      setState((s) => ({ ...s, receipts: s.receipts.map((r) => (r.id === receipt.id ? { ...r, ...receipt } : r)) }));
+      onChange?.();
+      return '';
+    } catch (err) {
+      return errorMessage(err);
     }
   }
 
@@ -78,7 +95,7 @@ export default function ReceiptsList({ profileId, refreshTrigger }) {
           </li>
         ))}
       </ul>
-      {detail && <ReceiptDialog detail={detail} onClose={() => setDetail(null)} onReview={handleReview} />}
+      {detail && <ReceiptDialog detail={detail} onClose={closeDetail} onReview={handleReview} onCorrect={handleCorrect} />}
     </section>
   );
 }
