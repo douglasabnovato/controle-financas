@@ -14,7 +14,7 @@
 
 ## Estado e próximos passos (ciclo de 16/11/2026)
 
-**Estado:** 8 de 12 critérios atendidos; **Finalizado: sim**, porque os 4 parciais (3, 5, 9 e 10) dependem do responsável, cada um com issue. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
+**Estado:** 8 de 12 critérios atendidos; **Finalizado: sim**, porque os 4 parciais (3, 5, 9 e 10) dependem do responsável, cada um com issue. O 9 segue parcial pela API publicada com rotas sem token (#47, #7); os alertas do Dependabot estão ligados desde 16/11/2026, com 0 alertas abertos. Detalhes em [`documentacao/MVP.md`](documentacao/MVP.md).
 
 **O que foi feito neste ciclo** (PR para a `developer/sprint-2026-11-19`; a `main` espera a revisão do responsável)
 - Correção da leitura: "Precisei corrigir" abre loja, data e total já preenchidos; a API (`PATCH /api/receipts/:id`) valida e só altera o cupom do perfil; catálogo e painel se atualizam (#29).
@@ -28,7 +28,7 @@
 - #7 Republicar a API a partir da `main` (responsável).
 - #19 Trocar a fonte do Pages para GitHub Actions (responsável); depois, #40 tirar a `docs/`.
 - #35 Criar a conta do GoatCounter (responsável).
-- #38 Ligar os alertas do Dependabot (responsável).
+- #38 Ligar os alertas do Dependabot (ligados pelo responsável em 16/11/2026, com 0 alertas abertos; a issue fica para ele fechar).
 - #43 Decidir sobre as fotos com dados pessoais no histórico (responsável).
 - #9 Medir a taxa de aceite, #36 validar com uma pessoa de fora, #41 corrigir os itens do cupom, #42 testar no celular.
 

@@ -1,12 +1,12 @@
 # MVP — Controle Finanças
 
-> Fonte única do estado. Tabela atual no topo; as anteriores estão em "Histórico", no fim.
+> Fonte única do estado. Tabela atual no topo; as anteriores estão em "Histórico", no fim. Revisto em 16/11/2026, às 12h29: critério 9 com os alertas do Dependabot ligados.
 
 **Nível:** Vitrine (N2), 12 critérios.
 
 **Resumo:** 8 de 12 aplicáveis atendidos
 
-**Finalizado:** sim — os 4 parciais dependem do responsável, cada um com issue `depende-do-responsavel`: 3 (republicar a API, #7), 5 (conta do GoatCounter, #35), 9 (ligar os alertas do Dependabot, #38, e tirar do ar a API antiga sem token, #47 e #7) e 10 (Pages pelo Actions, #19)
+**Finalizado:** sim — os 4 parciais dependem do responsável, cada um com issue `depende-do-responsavel`: 3 (republicar a API, #7), 5 (conta do GoatCounter, #35), 9 (tirar do ar a API antiga sem token, #47 e #7; os alertas do Dependabot foram ligados em 16/11/2026, #38) e 10 (Pages pelo Actions, #19)
 
 ## Critérios em 16/11/2026 (ciclo de 16/11/2026)
 
@@ -20,7 +20,7 @@
 | 6 | Falhas tratadas | Atende | `npx vitest run` no job `client`, run 43821745008, 16/11/2026: 31 de 31. Cobrem lista vazia, carregando, erro com "Tentar novamente", API fora ou antiga (`app.test.jsx`), IA ilegível ou incompleta com reenvio (`a11y.test.jsx`), correção com campo inválido e cupom repetido (`correcao.test.jsx`). Na API, `npm test` no job `server`: 8 de 8, 0 skipped (IA fora → 502, tipo errado → 415, correção inválida → 400, repetida → 409) | — |
 | 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 móvel no site publicado (`npx lighthouse https://douglasabnovato.github.io/controle-financas/ --chrome-flags="--headless --no-sandbox"`), 16/11/2026, 3 execuções válidas: LCP 1,57 / 2,30 / 1,36 s (mediana 1,57 s), TBT 58 / 45 / 110 ms, elemento do LCP `main > h1` ("Configurar acesso"). Regra de descarte: execução com `observedFirstContentfulPaint` acima de 2 s (CPU ocupada por outros testes). Descartadas 4, com FCP observado de 5,0 a 8,9 s; JSON das 7 execuções guardado fora do repositório | — |
 | 8 | Acessibilidade básica | Atende | No navegador (Chromium, 1280 px), `npm run test:e2e`, run 43821745008, 16/11/2026: 2 passed, só pelo teclado (Tab até cada controle, texto com `keyboard.type`, sem `.focus()` nem `fill()`), com o contorno de foco do app conferido (3px `#1d4ed8`), Tab preso no detalhe, Esc devolvendo o foco e erro da correção ligado ao campo; axe sem violações, com contraste, na entrada, no painel e no detalhe. O app não tem tema escuro próprio: o axe roda só no claro | — |
-| 9 | Segurança e conformidade | Parcial | Alertas do Dependabot desligados: `gh api "repos/douglasabnovato/controle-financas/dependabot/alerts?state=open&per_page=100"`, 16/11/2026: 403. Pela regra em decisão (engenharia#33), o audit sozinho não basta. `npm audit --omit=dev`, 16/11/2026: 0 vulnerabilidades em `client` e `server`. Token em todas as rotas `/api`, inclusive a correção nova; a API antiga sem token (`controllers/`, `routes/`) saiu do código. A API publicada é anterior à `main` e mantém rotas sem token: GET sem `Authorization` em `/api/users/:id` e `/api/receipts/:id`, 16/11/2026: 500, não 401 | #38, #47, #7 (responsável) |
+| 9 | Segurança e conformidade | Parcial | Segue "Parcial" pela API publicada, anterior à `main`, que mantém rotas sem token: GET sem `Authorization` em `/api/users/:id` e `/api/receipts/:id`, 16/11/2026: 500, não 401 (#47, #7). O resto atende: `gh api "repos/douglasabnovato/controle-financas/dependabot/alerts?state=open&per_page=100"`, 16/11/2026 12h00: 0 alertas abertos (alertas ligados pelo responsável nesse dia, #38). `npm audit --omit=dev` depois do `npm ci`, 16/11/2026 12h29: 0 vulnerabilidades em `client` e `server`. Token em todas as rotas `/api` da `main`, inclusive a correção nova; a API antiga sem token (`controllers/`, `routes/`) saiu do código | #47, #7 (responsável); #38 |
 | 10 | Entrega confiável | Parcial | `gh api repos/douglasabnovato/controle-financas/rules/branches/main`, 16/11/2026: `deletion`, `non_fast_forward`, `pull_request` e `required_status_checks` (`client`, `e2e` e `server`). `gh api repos/douglasabnovato/controle-financas/pages`, 16/11/2026: `build_type: legacy`, pasta `/docs` da `main`, que vai ao ar sem passar pelo CI. O job `deploy` do CI está pronto, travado por `PAGES_VIA_ACTIONS` | #19 (responsável) |
 | 11 | Testes dos fluxos críticos | Atende | Run 43821745008, 16/11/2026: `server` 8 de 8 (`# skipped 0`, PostgreSQL de serviço), `client` 31 de 31, `e2e` 2 passed | — |
 | 12 | Documentação honesta | Atende | README, este arquivo e o `DEPLOY.md` dizem que a API no ar é antiga e que o site sai de `docs/`, com issues; uma tabela só, e o resumo bate com ela | — |
@@ -46,6 +46,8 @@
 Insights, variação de preços, múltiplos idiomas e correção item a item dos produtos (#41). A lista é uma proposta e pode mudar com a decisão do responsável.
 
 ## Histórico
+
+- 16/11/2026, 12h29: critério 9 segue "Parcial" só pela API publicada com rotas sem token (#47, #7). A parte dos alertas trocou: antes a API respondia 403 (alertas desligados, engenharia#33); agora há 0 alertas abertos. Resumo sem mudança (8 de 12).
 
 ### Estado de 10/11/2026 (ciclo da faixa de 90%)
 
