@@ -5,9 +5,11 @@ const helmet = require("helmet");
 const multer = require("multer");
 const rateLimit = require("express-rate-limit");
 const { AppError } = require("./lib/errors");
-const { userInput, profileInput, profileQuery, reviewInput } = require("./lib/schemas");
+const { userInput, profileInput, profileQuery, reviewInput, correctionInput } = require("./lib/schemas");
 const { requireToken } = require("./middleware/auth");
 
+/* Maior id do SERIAL (int4): acima disso o PostgreSQL daria erro 22003, que viraria 500 */
+const MAX_ID = 2147483647;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 /* Valida com zod e converte falha em 400 */
@@ -73,7 +75,7 @@ function createApp({ repos, extractor, config }) {
   api.get("/receipts/:id", async (req, res) => {
     const { profile_id } = parse(profileQuery, req.query);
     const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id < 1) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
+    if (!Number.isInteger(id) || id < 1 || id > MAX_ID) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
     const found = await repos.receipts.findInProfile(id, profile_id);
     if (!found) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
     res.json(found);
@@ -82,8 +84,25 @@ function createApp({ repos, extractor, config }) {
   api.patch("/receipts/:id/review", async (req, res) => {
     const { profile_id, status } = parse(reviewInput, req.body);
     const id = Number(req.params.id);
-    if (!Number.isInteger(id) || id < 1) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
+    if (!Number.isInteger(id) || id < 1 || id > MAX_ID) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
     const receipt = await repos.receipts.setReview(id, profile_id, status);
+    if (!receipt) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
+    res.json({ receipt });
+  });
+
+  /* Correção manual da leitura (loja, data e total) pelo perfil dono do cupom */
+  api.patch("/receipts/:id", async (req, res) => {
+    const { profile_id, ...correction } = parse(correctionInput, req.body);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1 || id > MAX_ID) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
+    let receipt;
+    try {
+      receipt = await repos.receipts.correct(id, profile_id, correction);
+    } catch (err) {
+      /* 23505: a correção repete CNPJ, data com hora e total de outro cupom do perfil (índice uq_receipts_dedupe) */
+      if (err?.code === "23505") throw new AppError(409, "DUPLICATE", "Já existe outro cupom deste perfil com o mesmo CNPJ, data e total.");
+      throw err;
+    }
     if (!receipt) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
     res.json({ receipt });
   });
