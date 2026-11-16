@@ -126,3 +126,57 @@ Timebox: 75 min (fullstack com IA).
 **Este ciclo executa.** Foco preso no detalhe; axe e teclado nas telas depois do login (#20); dicas de foto e reenvio (#21); `docs/` reconstruída; `MVP.md` reorganizado.
 
 **Vira issue.** #29 (correção manual da leitura) e #30 (teste de ponta a ponta no navegador). Seguem com o responsável: #7, #18, #19, #22.
+
+## Ciclo de 16/11/2026
+
+> Branch `feature/2026-11-16` → `developer/sprint-2026-11-19` → `main` (o PR para a `main` fica com o responsável). Nível: Vitrine (N2), 12 critérios. Ponto de partida: 8 de 12 em 10/11/2026; o ciclo de 10/11 entrou na `main` pelo PR #33 (16/11/2026).
+
+### Produto
+
+**Problema e público.** Sem mudança: quem controla gastos da casa ou de um negócio envia a foto do cupom e recebe os itens catalogados, sem digitar.
+
+**Hipótese e meta.** Sem mudança: em 80% dos cupons, a pessoa aceita a leitura da IA sem corrigir o total (#22). Hoje "Precisei corrigir" só marca a leitura; a pessoa não consegue consertar loja, data e total, e o painel soma o valor errado.
+
+**O que a pesquisa trouxe.**
+
+| Ideia | O que levamos para o projeto | Fonte |
+|---|---|---|
+| Apps de leitura de recibos deixam a pessoa digitar loja, data e total quando a leitura falha | "Precisei corrigir" abre os campos já preenchidos com a leitura; o painel e o catálogo passam a usar o valor corrigido (#29) | [FlipperForce: dicas para a IA ler o recibo](https://help.flipperforce.com/en/articles/16654019-is-the-ai-having-trouble-reading-your-receipt-tips-for-a-perfect-scan) |
+| Quando o sistema detecta um erro de digitação, o campo com erro é apontado e o erro é descrito em texto | Cada campo da correção mostra a mensagem em texto, ligada a ele, e o foco vai para o primeiro campo com erro | [W3C, WCAG 2.2: Understanding SC 3.3.1 Error Identification](https://www.w3.org/WAI/WCAG22/Understanding/error-identification.html) |
+| A fonte do Pages passa a "GitHub Actions" em Settings → Pages; um workflow que já publica dispensa o modelo sugerido | O `DEPLOY.md` passa a descrever a publicação pelo CI, e a #19 ganha o passo a passo atualizado | [GitHub Docs: configurar a fonte de publicação do Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site) |
+| Os alertas do Dependabot se ligam em Settings → Advanced Security → Dependabot alerts → Enable | Issue nova com o passo a passo para o responsável; até lá, o critério 9 fica "Parcial" | [GitHub Docs: configurar alertas do Dependabot](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/configuring-dependabot-alerts) |
+
+**Backlog priorizado (impacto × esforço).**
+
+| Prioridade | Item | Impacto | Esforço | Destino |
+|---|---|---|---|---|
+| 1 | Tirar o código antigo da API que nada carrega (`controllers/`, `routes/`, `database/`, `services/geminiService.js`), com rotas sem token | Alto | Baixo | Este ciclo |
+| 2 | `MVP.md` honesto: critério 9 "Parcial" com o Dependabot desligado; critério 7 medido de novo; critério 8 com teste de teclado de verdade | Alto | Baixo | Este ciclo |
+| 3 | Fluxo principal no navegador só com teclado (Tab, Enter, `keyboard.type`) e foco visível conferido | Médio | Baixo | Este ciclo (#30) |
+| 4 | Corrigir loja, data e total da leitura | Médio | Médio | Este ciclo (#29) |
+| 5 | Republicar a API, Pages por Actions, GoatCounter, alertas do Dependabot | Alto | Baixo | Responsável (#7, #19, #35, issue nova) |
+| 6 | Correção item a item dos produtos | Baixo | Médio | Issue nova |
+
+**Fora do escopo.** Insights, variação de preços, vários idiomas, Supabase Auth, correção de perspectiva da imagem, correção item a item.
+
+### Engenharia
+
+**Arquitetura.** Sem mudança: React 19 + Vite + Tailwind no GitHub Pages; API Express 5 no Render com PostgreSQL no Supabase e leitura pelo Gemini. Rota nova: `PATCH /api/receipts/:id`, com token, validada por `zod`, que só altera o cupom do perfil informado e marca a leitura como corrigida.
+
+**Riscos.**
+- A API no ar segue anterior à `main` (`/health` 404 em 16/11/2026). A correção só funciona no site depois da #7.
+- A correção pode repetir loja, data e total de outro cupom do perfil; o índice de deduplicação recusa, e a API responde 409 com mensagem.
+- Data sem hora: gravada ao meio-dia, para não virar o dia anterior no fuso de Brasília.
+
+**Qualidade.**
+- Testes: integração da API com PostgreSQL no CI (correção válida, outro perfil, total zero, data inválida, duplicado); Vitest na interface da correção, com axe; Playwright do fluxo só com teclado e da correção, com axe e contraste.
+- Acessibilidade: rótulo em cada campo, erro em texto ligado ao campo (`aria-describedby`, `aria-invalid`), Tab preso no diálogo também nos campos. O app não tem tema escuro próprio; o axe roda só no claro.
+- Segurança: `npm audit --omit=dev` em `client` e `server`; a rota nova exige o token e o perfil dono do cupom.
+
+**Definição de pronto.** Lint, Vitest e build no `client`; CI verde (`server`, `client`, `e2e`) no PR para a sprint; revisão independente feita; `MVP.md` com uma tabela só e cada "Atende" com comando, data e resultado; README e `DEPLOY.md` atualizados.
+
+### Plano de ação
+
+**Este ciclo executa.** Itens 1 a 4 do backlog; `DEPLOY.md` com a publicação do Pages pelo CI; issue dos alertas do Dependabot.
+
+**Vira issue.** Correção item a item dos produtos; alertas do Dependabot (responsável). Seguem com o responsável: #7, #19, #22, #35.
