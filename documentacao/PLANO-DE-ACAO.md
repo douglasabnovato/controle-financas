@@ -165,8 +165,9 @@ Timebox: 75 min (fullstack com IA).
 
 **Riscos.**
 - A API no ar segue anterior à `main` (`/health` 404 em 16/11/2026). A correção só funciona no site depois da #7.
-- A correção pode repetir loja, data e total de outro cupom do perfil; o índice de deduplicação recusa, e a API responde 409 com mensagem.
-- Data sem hora: gravada ao meio-dia, para não virar o dia anterior no fuso de Brasília.
+- A correção pode repetir CNPJ, data com hora e total de outro cupom do perfil; o índice de deduplicação (`uq_receipts_dedupe`, que não usa a loja) recusa, e a API responde 409 com mensagem. Se o banco já tinha duplicados, o índice não existe e o 409 não acontece.
+- Hora da compra: se o dia não muda, a hora lida fica (o reenvio da mesma foto segue recusado); se muda, o cupom vai para o meio-dia do dia novo. O formulário preenche a data com o dia gravado, sem o fuso do navegador.
+- Fotos de cupom com dados pessoais de terceiros em `assets/modelos/`: saem da árvore neste ciclo; o histórico fica com o responsável (#43).
 
 **Qualidade.**
 - Testes: integração da API com PostgreSQL no CI (correção válida, outro perfil, total zero, data inválida, duplicado); Vitest na interface da correção, com axe; Playwright do fluxo só com teclado e da correção, com axe e contraste.
@@ -179,4 +180,4 @@ Timebox: 75 min (fullstack com IA).
 
 **Este ciclo executa.** Itens 1 a 4 do backlog; `DEPLOY.md` com a publicação do Pages pelo CI; issue dos alertas do Dependabot.
 
-**Vira issue.** Correção item a item dos produtos; alertas do Dependabot (responsável). Seguem com o responsável: #7, #19, #22, #35.
+**Vira issue.** Correção item a item dos produtos (#41); alertas do Dependabot (#38, responsável); fotos no histórico (#43, responsável); tirar a `docs/` (#40); celular (#42). Seguem com o responsável: #7, #19, #22, #35.

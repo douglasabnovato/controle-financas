@@ -28,7 +28,7 @@
 - #7 Republicar a API a partir da `main` (responsável).
 - #19 Trocar a fonte do Pages para GitHub Actions (responsável); depois, #40 tirar a `docs/`.
 - #35 Criar a conta do GoatCounter (responsável).
-- #38 Ligar os alertas do Dependabot e #39 exigir o `e2e` na `main` (responsável).
+- #38 Ligar os alertas do Dependabot (responsável).
 - #43 Decidir sobre as fotos com dados pessoais no histórico (responsável).
 - #9 Medir a taxa de aceite, #36 validar com uma pessoa de fora, #41 corrigir os itens do cupom, #42 testar no celular.
 
@@ -587,4 +587,4 @@ Desenvolvido por Senior Fullstack Developer & Product Manager no âmbito do ecos
 - Conferir se `/health` responde e se `/api/receipts` exige token.
 - Avaliar um cupom no site publicado e conferir o cartão "Leituras aceitas" no painel.
 
-Acompanhamento nas issues #7, #9, #19, #22, #35, #38, #39 e #43.
+Acompanhamento nas issues #7, #9, #19, #22, #35, #38 e #43.

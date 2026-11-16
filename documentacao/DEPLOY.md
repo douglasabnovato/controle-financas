@@ -95,7 +95,7 @@ Branch principal: **`main`**.
 
 ### Etapa 2 · Subir para o GitHub
 
-Feito. A remoção dos arquivos antigos da API (`controllers/`, `routes/`, `database/connection.js`, `services/geminiService.js`) e dos arquivos do modelo do Vite entrou no ciclo de 16/11/2026. O CI está em `.github/workflows/ci.yml`, com os jobs `server`, `client`, `e2e` e `deploy`. Tudo entra na `main` por PR (fluxo `feature/AAAA-MM-DD` → `developer/sprint-<quinta>` → `main`), com `client` e `server` obrigatórios.
+Feito. A remoção dos arquivos antigos da API (`controllers/`, `routes/`, `database/connection.js`, `services/geminiService.js`) e dos arquivos do modelo do Vite entrou no ciclo de 16/11/2026. O CI está em `.github/workflows/ci.yml`, com os jobs `server`, `client`, `e2e` e `deploy`. Tudo entra na `main` por PR (fluxo `feature/AAAA-MM-DD` → `developer/sprint-<quinta>` → `main`), com `client`, `e2e` e `server` obrigatórios no ruleset da `main`.
 
 ### Etapa 3 · API no Render
 
@@ -118,7 +118,6 @@ Em 16/11/2026, `gh api repos/douglasabnovato/controle-financas/pages` responde `
 2. **Settings → Secrets and variables → Actions → aba Variables → New repository variable**: nome `PAGES_VIA_ACTIONS`, valor `true`.
 3. **Actions → CI → Run workflow**, branch `main`. Os jobs `server`, `client`, `e2e` e `deploy` terminam verdes.
 4. Conferir: `gh api repos/douglasabnovato/controle-financas/pages --jq .build_type` responde `workflow`, e o site abre a tela "Configurar acesso".
-5. Opcional, mas recomendado: incluir o check `e2e` nos obrigatórios do ruleset da `main` (#39).
 
 Depois disso, o agente tira a pasta `docs/` e o `outDir: '../docs'` do `client/vite.config.js` por PR (#40). Até lá, quem muda o front roda `cd client && npm run build` (grava em `../docs`) e versiona a `docs/` no mesmo PR.
 
