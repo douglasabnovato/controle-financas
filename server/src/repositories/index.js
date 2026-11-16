@@ -113,6 +113,16 @@ function createRepositories(pool) {
         );
         return rows[0] ? toReceipt(rows[0]) : null;
       },
+      /* Corrige loja, data e total e marca a leitura como corrigida; null se o cupom não for do perfil.
+         A data fica ao meio-dia para não virar o dia anterior no fuso de Brasília. */
+      async correct(id, profileId, c) {
+        const { rows } = await pool.query(
+          `UPDATE receipts SET store_name = $1, purchase_date = $2::date + time '12:00', total_amount = $3, review_status = 'corrected'
+           WHERE id = $4 AND profile_id = $5 RETURNING *`,
+          [c.store_name, c.purchase_date, c.total_amount, id, profileId]
+        );
+        return rows[0] ? toReceipt(rows[0]) : null;
+      },
       async summary(profileId) {
         const totals = await pool.query(
           `SELECT count(id)::int AS total_receipts, coalesce(sum(total_amount), 0) AS total_spent,

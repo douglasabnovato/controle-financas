@@ -19,6 +19,23 @@ const profileQuery = z.object({ profile_id: z.string().uuid() });
 
 const reviewInput = z.object({ profile_id: z.string().uuid(), status: z.enum(["accepted", "corrected"]) });
 
+/* Data do calendário (AAAA-MM-DD) que existe de fato: 2026-02-30 é recusada */
+const calendarDate = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "Use a data no formato AAAA-MM-DD.")
+  .refine((s) => {
+    const d = new Date(`${s}T00:00:00Z`);
+    return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
+  }, "Data inválida.");
+
+/* Correção manual da leitura: loja, data e total (maior que zero) do cupom do perfil */
+const correctionInput = z.object({
+  profile_id: z.string().uuid(),
+  store_name: z.string().trim().min(1, "Informe a loja.").max(255),
+  purchase_date: calendarDate,
+  total_amount: money.refine((n) => n > 0, "O total precisa ser maior que zero."),
+});
+
 const extractedReceipt = z.object({
   store_name: z.string().trim().min(1).max(255),
   cnpj: z.string().trim().max(50).nullable().optional().transform((v) => (v ? v : null)),
@@ -39,5 +56,5 @@ const extractedReceipt = z.object({
 });
 
 module.exports = { userInput, profileInput, profileQuery,
-  reviewInput, extractedReceipt };
+  reviewInput, correctionInput, extractedReceipt };
 /* Fim de schemas.js */

@@ -5,7 +5,7 @@ const helmet = require("helmet");
 const multer = require("multer");
 const rateLimit = require("express-rate-limit");
 const { AppError } = require("./lib/errors");
-const { userInput, profileInput, profileQuery, reviewInput } = require("./lib/schemas");
+const { userInput, profileInput, profileQuery, reviewInput, correctionInput } = require("./lib/schemas");
 const { requireToken } = require("./middleware/auth");
 
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
@@ -84,6 +84,23 @@ function createApp({ repos, extractor, config }) {
     const id = Number(req.params.id);
     if (!Number.isInteger(id) || id < 1) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
     const receipt = await repos.receipts.setReview(id, profile_id, status);
+    if (!receipt) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
+    res.json({ receipt });
+  });
+
+  /* Correção manual da leitura (loja, data e total) pelo perfil dono do cupom */
+  api.patch("/receipts/:id", async (req, res) => {
+    const { profile_id, ...correction } = parse(correctionInput, req.body);
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id < 1) throw new AppError(400, "VALIDATION", "Id de cupom inválido.");
+    let receipt;
+    try {
+      receipt = await repos.receipts.correct(id, profile_id, correction);
+    } catch (err) {
+      /* 23505: a correção repete loja, data e total de outro cupom do perfil (índice de deduplicação) */
+      if (err?.code === "23505") throw new AppError(409, "DUPLICATE", "Já existe um cupom com esta data e este total neste perfil.");
+      throw err;
+    }
     if (!receipt) throw new AppError(404, "NOT_FOUND", "Cupom não encontrado.");
     res.json({ receipt });
   });

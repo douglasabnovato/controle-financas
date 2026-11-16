@@ -95,6 +95,52 @@ test("fluxo completo: usuário → perfil → cupom → lista → detalhe → da
   assert.deepEqual(after.body.reading_review, { accepted: 1, corrected: 0, acceptance_rate: 100 });
 });
 
+test("correctionInput recusa data inexistente, total zero e loja vazia (#29)", () => {
+  const { correctionInput } = require("../src/lib/schemas");
+  const pid = "00000000-0000-0000-0000-000000000000";
+  const ok = correctionInput.parse({ profile_id: pid, store_name: " Mercado Certo ", purchase_date: "2026-11-09", total_amount: "25.5" });
+  assert.deepEqual(ok, { profile_id: pid, store_name: "Mercado Certo", purchase_date: "2026-11-09", total_amount: 25.5 });
+  assert.equal(correctionInput.safeParse({ ...ok, purchase_date: "2026-02-30" }).success, false);
+  assert.equal(correctionInput.safeParse({ ...ok, purchase_date: "09/11/2026" }).success, false);
+  assert.equal(correctionInput.safeParse({ ...ok, total_amount: 0 }).success, false);
+  assert.equal(correctionInput.safeParse({ ...ok, store_name: "  " }).success, false);
+});
+
+test("correção da leitura: só o perfil dono, valida os campos e muda catálogo e painel (#29)", opts, async () => {
+  const user = await auth(request(app).post("/api/users")).send({ full_name: "Pessoa Correcao", email: "correcao@empresa.test", nickname: "pc", whatsapp: "11900000002" }).expect(201);
+  const pid = (await auth(request(app).post("/api/profiles")).send({ user_id: user.body.user.id, profile_name: "Casa" }).expect(201)).body.profile.id;
+  const other = (await auth(request(app).post("/api/profiles")).send({ user_id: user.body.user.id, profile_name: "Outro" }).expect(201)).body.profile.id;
+  nextExtraction = () => parseExtraction(JSON.stringify(sample));
+  const id = (await auth(request(app).post("/api/receipts/process")).field("profile_id", pid).attach("receipt_image", png, { filename: "c.png", contentType: "image/png" }).expect(201)).body.receipt.id;
+  nextExtraction = () => parseExtraction(JSON.stringify({ ...sample, total_amount: 50, purchase_date: "2026-09-12T10:00:00" }));
+  await auth(request(app).post("/api/receipts/process")).field("profile_id", pid).attach("receipt_image", png, { filename: "d.png", contentType: "image/png" }).expect(201);
+
+  const fix = { profile_id: pid, store_name: "Padaria Certa", purchase_date: "2026-09-11", total_amount: 25.5 };
+  await request(app).patch(`/api/receipts/${id}`).send(fix).expect(401);
+  await auth(request(app).patch(`/api/receipts/${id}`)).send({ ...fix, profile_id: other }).expect(404);
+  await auth(request(app).patch(`/api/receipts/${id}`)).send({ ...fix, total_amount: 0 }).expect(400);
+  await auth(request(app).patch(`/api/receipts/${id}`)).send({ ...fix, purchase_date: "2026-02-30" }).expect(400);
+  await auth(request(app).patch("/api/receipts/abc")).send(fix).expect(400);
+
+  const fixed = await auth(request(app).patch(`/api/receipts/${id}`)).send(fix).expect(200);
+  assert.equal(fixed.body.receipt.store_name, "Padaria Certa");
+  assert.equal(fixed.body.receipt.total_amount, 25.5);
+  assert.equal(fixed.body.receipt.review_status, "corrected");
+  const stored = await pool.query("SELECT to_char(purchase_date, 'YYYY-MM-DD HH24:MI') AS d FROM receipts WHERE id = $1", [id]);
+  assert.equal(stored.rows[0].d, "2026-09-11 12:00");
+
+  const detail = await auth(request(app).get(`/api/receipts/${id}`)).query({ profile_id: pid }).expect(200);
+  assert.equal(detail.body.receipt.total_amount, 25.5);
+  assert.equal(detail.body.products.length, 2);
+  const dash = await auth(request(app).get("/api/receipts/dashboard/summary")).query({ profile_id: pid }).expect(200);
+  assert.equal(dash.body.summary.total_spent, 75.5);
+  assert.deepEqual(dash.body.reading_review, { accepted: 0, corrected: 1, acceptance_rate: 0 });
+
+  const list = await auth(request(app).get("/api/receipts")).query({ profile_id: pid }).expect(200);
+  const second = list.body.receipts.find((r) => r.id !== id);
+  await auth(request(app).patch(`/api/receipts/${second.id}`)).send({ ...fix, total_amount: 25.5 }).expect(409);
+});
+
 test("upload inválido: sem arquivo 400, tipo errado 415, perfil inexistente 404", opts, async () => {
   const pid = "00000000-0000-0000-0000-000000000000";
   await auth(request(app).post("/api/receipts/process")).field("profile_id", pid).expect(400);
