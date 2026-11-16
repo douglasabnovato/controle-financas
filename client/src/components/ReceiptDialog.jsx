@@ -6,6 +6,13 @@ import { formatBRL, formatDate, formatQty, parseBRDate, parseBRL } from '../util
 const REVIEW_LABELS = { accepted: 'Leitura aceita.', corrected: 'Leitura marcada como corrigida.' };
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled])';
 
+/* Dia gravado no banco (AAAA-MM-DD do início do texto), sem passar pelo fuso do navegador:
+   assim, salvar sem mexer na data não troca o dia de um cupom lido de madrugada */
+function storedDate(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value ?? ''));
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
+}
+
 /* Valida os campos da correção; devolve { values } ou { errors } com mensagens em texto */
 function validate(form) {
   const errors = {};
@@ -22,7 +29,7 @@ function validate(form) {
 function CorrectionForm({ receipt, onSave, onCancel }) {
   const [form, setForm] = useState({
     store: receipt.store_name || '',
-    date: formatDate(receipt.purchase_date) === '—' ? '' : formatDate(receipt.purchase_date),
+    date: storedDate(receipt.purchase_date),
     total: Number(receipt.total_amount || 0).toFixed(2).replace('.', ','),
   });
   const [errors, setErrors] = useState({});

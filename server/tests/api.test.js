@@ -139,6 +139,17 @@ test("correção da leitura: só o perfil dono, valida os campos e muda catálog
   const list = await auth(request(app).get("/api/receipts")).query({ profile_id: pid }).expect(200);
   const second = list.body.receipts.find((r) => r.id !== id);
   await auth(request(app).patch(`/api/receipts/${second.id}`)).send({ ...fix, total_amount: 25.5 }).expect(409);
+  await auth(request(app).patch("/api/receipts/99999999999")).send(fix).expect(400);
+
+  /* Corrigir só a loja mantém a hora da compra: o reenvio da mesma foto segue recusado como duplicado */
+  const third = { ...sample, total_amount: 70, purchase_date: "2026-09-13T07:45:00" };
+  nextExtraction = () => parseExtraction(JSON.stringify(third));
+  const thirdId = (await auth(request(app).post("/api/receipts/process")).field("profile_id", pid).attach("receipt_image", png, { filename: "e.png", contentType: "image/png" }).expect(201)).body.receipt.id;
+  await auth(request(app).patch(`/api/receipts/${thirdId}`)).send({ profile_id: pid, store_name: "Loja Certa", purchase_date: "2026-09-13", total_amount: 70 }).expect(200);
+  const kept = await pool.query("SELECT to_char(purchase_date, 'YYYY-MM-DD HH24:MI') AS d FROM receipts WHERE id = $1", [thirdId]);
+  assert.equal(kept.rows[0].d, "2026-09-13 07:45");
+  const again = await auth(request(app).post("/api/receipts/process")).field("profile_id", pid).attach("receipt_image", png, { filename: "e.png", contentType: "image/png" }).expect(409);
+  assert.equal(again.body.code, "DUPLICATE");
 });
 
 test("upload inválido: sem arquivo 400, tipo errado 415, perfil inexistente 404", opts, async () => {

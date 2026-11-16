@@ -55,6 +55,13 @@ describe('formulário de correção no detalhe', () => {
     expect(await violations()).toEqual([]);
   });
 
+  it('preenche a data com o dia gravado, sem o fuso do navegador (cupom de madrugada)', async () => {
+    const madrugada = { ...DETAIL, receipt: { ...RECEIPT, purchase_date: '2026-11-10T01:30:00.000Z' } };
+    render(<ReceiptDialog detail={madrugada} onClose={() => {}} onReview={() => {}} onCorrect={vi.fn()} />);
+    await userEvent.click(screen.getByRole('button', { name: 'Precisei corrigir' }));
+    expect(screen.getByLabelText('Data da compra (DD/MM/AAAA)').value).toBe('10/11/2026');
+  });
+
   it('mostra o erro em texto ligado ao campo e põe o foco no primeiro campo com erro', async () => {
     const onCorrect = vi.fn();
     render(<main><ReceiptDialog detail={DETAIL} onClose={() => {}} onReview={() => {}} onCorrect={onCorrect} /></main>);
