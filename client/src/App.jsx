@@ -31,7 +31,7 @@ export default function App() {
         <main className="space-y-6">
           <DashboardSummary profileId={profileId} refreshTrigger={refresh} />
           <ReceiptUpload profileId={profileId} onUploadSuccess={() => setRefresh((n) => n + 1)} />
-          <ReceiptsList profileId={profileId} refreshTrigger={refresh} />
+          <ReceiptsList profileId={profileId} refreshTrigger={refresh} onChange={() => setRefresh((n) => n + 1)} />
         </main>
       </div>
     </div>
