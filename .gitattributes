@@ -1,0 +1,3 @@
+# O build do client copia o index.html para a docs/: LF em todas as máquinas, para o build sair igual ao do CI
+client/index.html text eol=lf
+docs/index.html text eol=lf

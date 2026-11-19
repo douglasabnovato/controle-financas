@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, cleanup, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
-import { parseBRL, parseBRDate } from '../utils/format';
+import { formatDate, parseBRL, parseBRDate } from '../utils/format';
 
 vi.mock('../services/api', async () => {
   const actual = await vi.importActual('../services/api');
@@ -134,9 +134,58 @@ describe('correção no catálogo, com a API', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Detalhes do cupom C007/ }));
     const dialog = await screen.findByRole('dialog');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Precisei corrigir' }));
+    const total = within(dialog).getByLabelText('Total (R$)');
+    await userEvent.clear(total);
+    await userEvent.type(total, '30,00');
     await userEvent.click(within(dialog).getByRole('button', { name: 'Salvar correção' }));
     expect((await within(dialog).findByRole('alert')).textContent).toMatch(/Já existe um cupom/);
     expect(within(dialog).getByLabelText('Loja')).toBeTruthy();
+  });
+});
+
+describe('refinos da correção (#45)', () => {
+  it('a região de status fica sempre no DOM e só o texto muda, para o leitor de tela anunciar', async () => {
+    api.get.mockResolvedValueOnce({ data: { receipts: [RECEIPT] } });
+    api.get.mockResolvedValueOnce({ data: DETAIL });
+    api.patch.mockResolvedValueOnce({ data: { receipt: { ...RECEIPT, total_amount: 25.5, review_status: 'corrected' } } });
+    render(<ReceiptsList profileId="p1" refreshTrigger={0} />);
+    await userEvent.click(await screen.findByRole('button', { name: /Detalhes do cupom C007/ }));
+    const dialog = await screen.findByRole('dialog');
+    const status = within(dialog).getByRole('status');
+    expect(status.textContent).toBe('');
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Precisei corrigir' }));
+    expect(within(dialog).getByRole('status')).toBe(status);
+    const total = within(dialog).getByLabelText('Total (R$)');
+    await userEvent.clear(total);
+    await userEvent.type(total, '25,50{Enter}');
+    await vi.waitFor(() => expect(status.textContent).toBe('Correção salva.'));
+    expect(within(dialog).getByRole('status')).toBe(status);
+    expect(status.isConnected).toBe(true);
+  });
+
+  it('salvar sem nenhuma mudança não chama a API e diz que nada mudou', async () => {
+    const onCorrect = vi.fn();
+    render(<main><ReceiptDialog detail={DETAIL} onClose={() => {}} onReview={() => {}} onCorrect={onCorrect} /></main>);
+    await userEvent.click(screen.getByRole('button', { name: 'Precisei corrigir' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Salvar correção' }));
+    expect(onCorrect).not.toHaveBeenCalled();
+    expect(screen.getByRole('status').textContent).toMatch(/^Nada mudou/);
+    expect(screen.queryByLabelText('Loja')).toBeNull();
+    await vi.waitFor(() => expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Precisei corrigir' })));
+    expect(await violations()).toEqual([]);
+  });
+
+  it('mostra o dia gravado, sem o fuso do navegador: cupom de 01:30 não volta um dia', () => {
+    const fuso = process.env.TZ;
+    process.env.TZ = 'America/Sao_Paulo';
+    try {
+      expect(formatDate('2026-11-10T01:30:00.000Z')).toBe('10/11/2026');
+      expect(formatDate('2026-11-10T01:30:00')).toBe('10/11/2026');
+      expect(formatDate('')).toBe('—');
+    } finally {
+      if (fuso === undefined) delete process.env.TZ;
+      else process.env.TZ = fuso;
+    }
   });
 });
 /* Fim de correcao.test.jsx */

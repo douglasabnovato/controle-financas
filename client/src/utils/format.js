@@ -6,8 +6,11 @@ export function formatBRL(value) {
   return brl.format(Number(value) || 0);
 }
 
-/* ISO → "10/09/2026" */
+/* ISO → "10/09/2026". Usa o dia gravado (AAAA-MM-DD do início do texto), sem o fuso do navegador:
+   um cupom de 01:30 não aparece com o dia anterior (#45). Sem esse formato, cai na data do navegador. */
 export function formatDate(value) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value ?? ''));
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('pt-BR');
 }
