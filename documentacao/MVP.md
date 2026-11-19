@@ -1,6 +1,6 @@
 # MVP — Controle Finanças
 
-> Fonte única do estado. Tabela atual no topo; as anteriores estão em "Histórico", no fim. Revisto em 16/11/2026, às 12h29: critério 9 com os alertas do Dependabot ligados.
+> Fonte única do estado. Tabela atual no topo; as anteriores estão em "Histórico", no fim. Revisto em 18/11/2026, às 21h16: evidências de 6, 8 e 11 com o fluxo no celular (#42) e os refinos da correção (#45).
 
 **Nível:** Vitrine (N2), 12 critérios.
 
@@ -17,12 +17,12 @@
 | 3 | Fluxo principal completo | Parcial | No navegador, com a API real: `npm run test:e2e` no job `e2e` do CI, run [43821745008](https://github.com/douglasabnovato/controle-financas/actions/runs/43821745008), 16/11/2026: 2 passed (entrada, envio do cupom, catálogo, detalhe, avaliação e correção da leitura, PostgreSQL de serviço, leitura da IA simulada). No ar, a API é antiga: `curl https://controle-financas-api-71f6.onrender.com/health`, 16/11/2026: 404 (`Cannot GET /health`, `x-render-origin-server: Render`) | #7 (responsável). A validação com uma pessoa de fora (#36) saiu do MVP pela decisão D2 de 10/11/2026 e não bloqueia o critério |
 | 4 | Escopo enxuto | Atende | "Fora do MVP" abaixo e "Fora do escopo" no `PLANO-DE-ACAO.md` (insights, variação de preços, idiomas, Supabase Auth, correção item a item) | — |
 | 5 | Medição de uso | Parcial | Código pronto, sem painel: GoatCounter sem cookie (`client/src/lib/medicao.js`), só no build de produção fora de localhost, com o evento `enviar-cupom` (`medicao.test.js` no run 43821745008). Falta a conta do GoatCounter | #35 (responsável), #7, #9 |
-| 6 | Falhas tratadas | Atende | `npx vitest run` no job `client`, run 43821745008, 16/11/2026: 31 de 31. Cobrem lista vazia, carregando, erro com "Tentar novamente", API fora ou antiga (`app.test.jsx`), IA ilegível ou incompleta com reenvio (`a11y.test.jsx`), correção com campo inválido e cupom repetido (`correcao.test.jsx`). Na API, `npm test` no job `server`: 8 de 8, 0 skipped (IA fora → 502, tipo errado → 415, correção inválida → 400, repetida → 409) | — |
+| 6 | Falhas tratadas | Atende | `npx vitest run` no job `client`, run [44427454310](https://github.com/douglasabnovato/controle-financas/actions/runs/44427454310), 18/11/2026: 34 de 34. Cobrem lista vazia, carregando, erro com "Tentar novamente", API fora ou antiga (`app.test.jsx`), IA ilegível ou incompleta com reenvio (`a11y.test.jsx`), correção com campo inválido, cupom repetido e correção sem mudança, que não chama a API (`correcao.test.jsx`, #45). Na API, `npm test` no job `server`: 8 de 8, 0 skipped (IA fora → 502, tipo errado → 415, correção inválida → 400, repetida → 409) | — |
 | 7 | Desempenho aceitável | Atende | Lighthouse 12.8.2 móvel no site publicado (`npx lighthouse https://douglasabnovato.github.io/controle-financas/ --chrome-flags="--headless --no-sandbox"`), 16/11/2026, 3 execuções válidas: LCP 1,57 / 2,30 / 1,36 s (mediana 1,57 s), TBT 58 / 45 / 110 ms, elemento do LCP `main > h1` ("Configurar acesso"). Regra de descarte: execução com `observedFirstContentfulPaint` acima de 2 s (CPU ocupada por outros testes). Descartadas 4, com FCP observado de 5,0 a 8,9 s; JSON das 7 execuções guardado fora do repositório | — |
-| 8 | Acessibilidade básica | Atende | No navegador (Chromium, 1280 px), `npm run test:e2e`, run 43821745008, 16/11/2026: 2 passed, só pelo teclado (Tab até cada controle, texto com `keyboard.type`, sem `.focus()` nem `fill()`), com o contorno de foco do app conferido (3px `#1d4ed8`), Tab preso no detalhe, Esc devolvendo o foco e erro da correção ligado ao campo; axe sem violações, com contraste, na entrada, no painel e no detalhe. O app não tem tema escuro próprio: o axe roda só no claro | — |
+| 8 | Acessibilidade básica | Atende | No navegador (Chromium, 1280 px e celular 375 x 812, #42), `npm run test:e2e`, run 44427454310, 18/11/2026: 4 passed (2 por largura), sem rolagem lateral (`scrollWidth <= innerWidth` na entrada, no painel e no detalhe, animações ligadas no celular), só pelo teclado (Tab até cada controle, texto com `keyboard.type`, sem `.focus()` nem `fill()`), com o contorno de foco do app conferido (3px `#1d4ed8`), Tab preso no detalhe, Esc devolvendo o foco e erro da correção ligado ao campo; axe sem violações, com contraste, na entrada, no painel e no detalhe. O app não tem tema escuro próprio: o axe roda só no claro | — |
 | 9 | Segurança e conformidade | Parcial | Segue "Parcial" pela API publicada, anterior à `main`, que mantém rotas sem token: GET sem `Authorization` em `/api/users/:id` e `/api/receipts/:id`, 16/11/2026: 500, não 401 (#47, #7). O resto atende: `gh api "repos/douglasabnovato/controle-financas/dependabot/alerts?state=open&per_page=100"`, 16/11/2026 12h00: 0 alertas abertos (alertas ligados pelo responsável nesse dia, #38). `npm audit --omit=dev` depois do `npm ci`, 16/11/2026 12h29: 0 vulnerabilidades em `client` e `server`. Token em todas as rotas `/api` da `main`, inclusive a correção nova; a API antiga sem token (`controllers/`, `routes/`) saiu do código | #47, #7 (responsável); #38 |
 | 10 | Entrega confiável | Parcial | `gh api repos/douglasabnovato/controle-financas/rules/branches/main`, 16/11/2026: `deletion`, `non_fast_forward`, `pull_request` e `required_status_checks` (`client`, `e2e` e `server`). `gh api repos/douglasabnovato/controle-financas/pages`, 16/11/2026: `build_type: legacy`, pasta `/docs` da `main`, que vai ao ar sem passar pelo CI. O job `deploy` do CI está pronto, travado por `PAGES_VIA_ACTIONS` | #19 (responsável) |
-| 11 | Testes dos fluxos críticos | Atende | Run 43821745008, 16/11/2026: `server` 8 de 8 (`# skipped 0`, PostgreSQL de serviço), `client` 31 de 31, `e2e` 2 passed | — |
+| 11 | Testes dos fluxos críticos | Atende | Run 44427454310, 18/11/2026: `server` 8 de 8 (`# skipped 0`, PostgreSQL de serviço), `client` 34 de 34, `e2e` 4 passed (desktop e celular). O job `client` também falha se a `docs/` versionada não for o build atual (#45) | — |
 | 12 | Documentação honesta | Atende | README, este arquivo e o `DEPLOY.md` dizem que a API no ar é antiga e que o site sai de `docs/`, com issues; uma tabela só, e o resumo bate com ela | — |
 
 **Atendidos:** 1, 2, 4, 6, 7, 8, 11 e 12. **Parciais:** 3, 5, 9 e 10, todos à espera do responsável.
@@ -36,10 +36,10 @@
 ## Próximas tarefas
 
 - Republicar a API no Render e conferir a autenticação (responsável, #7).
-- Trocar a fonte do Pages para GitHub Actions (responsável, #19) e depois tirar a `docs/` (#40).
+- Trocar a fonte do Pages para GitHub Actions (responsável, #19) e depois tirar a `docs/` (critério 3 da #19).
 - Ligar os alertas do Dependabot (responsável, #38) e decidir sobre as fotos no histórico (responsável, #43).
 - Medir a taxa de aceite da leitura, depois da #7 (#9).
-- Testar no celular (#42) e corrigir os itens do cupom (#41).
+- Levar à `main` o fluxo no celular (#42) e os refinos da correção (#45), do PR #51.
 
 ## Fora do MVP
 
@@ -47,6 +47,7 @@ Insights, variação de preços, múltiplos idiomas e correção item a item dos
 
 ## Histórico
 
+- 18/11/2026, 21h16: evidências dos critérios 6, 8 e 11 trocadas pelo run 44427454310 (PR #51): `client` 34 de 34, `e2e` 4 passed com a largura de celular (#42), correção sem mudança e data sem fuso (#45). Resumo sem mudança (8 de 12). A #40 foi fechada como duplicada do critério 3 da #19; a #41 segue fora do MVP.
 - 16/11/2026, 12h29: critério 9 segue "Parcial" só pela API publicada com rotas sem token (#47, #7). A parte dos alertas trocou: antes a API respondia 403 (alertas desligados, engenharia#33); agora há 0 alertas abertos. Resumo sem mudança (8 de 12).
 
 ### Estado de 10/11/2026 (ciclo da faixa de 90%)

@@ -1,4 +1,4 @@
-/* Fluxo principal no navegador, com a API real, só pelo teclado: configurar o acesso, enviar a foto de um cupom,
+/* Fluxo principal no navegador, com a API real, só pelo teclado, em 1280 px e no celular (375 px, sem rolagem lateral): configurar o acesso, enviar a foto de um cupom,
    ver no catálogo, abrir o detalhe, avaliar ou corrigir a leitura (#29) e fechar com Esc. axe com contraste em cada tela.
    Sem .focus() nem fill(): o foco anda com Tab e o texto entra com keyboard.type. A única exceção é o arquivo:
    o Espaço abre o seletor, e o Playwright escolhe o arquivo, porque o seletor do sistema não é controlável. */
@@ -15,6 +15,21 @@ async function semViolacoes(page, seletor) {
   if (seletor) builder.include(seletor);
   const { violations } = await builder.analyze();
   expect(violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(', ')}`)).toEqual([]);
+}
+
+/* Sem rolagem horizontal (#42): a página não fica mais larga que a janela. Vale nos dois projetos e pesa no celular */
+async function semRolagemLateral(page) {
+  const { largura, janela, caixa } = await page.evaluate(() => {
+    /* O diálogo é fixed com overflow-y-auto: um transbordo dentro dele não aparece no scrollWidth da página */
+    const dialogo = document.querySelector('[role="dialog"]');
+    return {
+      largura: document.documentElement.scrollWidth,
+      janela: window.innerWidth,
+      caixa: dialogo ? [dialogo.scrollWidth, dialogo.clientWidth] : null,
+    };
+  });
+  expect(largura, `scrollWidth ${largura} > innerWidth ${janela}`).toBeLessThanOrEqual(janela);
+  if (caixa) expect(caixa[0], `diálogo: scrollWidth ${caixa[0]} > clientWidth ${caixa[1]}`).toBeLessThanOrEqual(caixa[1]);
 }
 
 /* Aperta Tab até o alvo receber o foco (prova que ele é alcançável pelo teclado) */
@@ -51,6 +66,7 @@ async function entrarEEnviar(page) {
   await page.goto('/controle-financas/');
   await expect(page.getByRole('heading', { name: 'Configurar acesso' })).toBeVisible();
   await semViolacoes(page);
+  await semRolagemLateral(page);
 
   /* Dados fictícios: nenhum dado pessoal real */
   const campos = [
@@ -70,6 +86,7 @@ async function entrarEEnviar(page) {
   await expect(page.getByRole('heading', { name: 'Enviar novo cupom fiscal' })).toBeVisible();
   await expect(page.getByText('Nenhum cupom cadastrado ainda.')).toBeVisible();
   await semViolacoes(page);
+  await semRolagemLateral(page);
 
   await tabAte(page, page.getByLabel(/Foto do cupom/));
   const [seletor] = await Promise.all([page.waitForEvent('filechooser'), page.keyboard.press('Space')]);
@@ -89,6 +106,7 @@ async function entrarEEnviar(page) {
   await expect(dialogo.getByText('Pão francês')).toBeVisible();
   await expect(dialogo.getByRole('button', { name: 'Fechar' })).toBeFocused();
   await semViolacoes(page, '[role="dialog"]');
+  await semRolagemLateral(page);
   return { detalhes, dialogo };
 }
 

@@ -9,7 +9,13 @@ export const TOKEN = process.env.E2E_API_TOKEN || 'e2e-token-de-teste-com-32-car
 export default defineConfig({
   testDir: 'e2e',
   timeout: 60_000,
-  use: { baseURL: `http://localhost:${WEB_PORT}`, reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } },
+  use: { baseURL: `http://localhost:${WEB_PORT}` },
+  /* Desktop (1280 px) e celular (375 x 812, #42). No celular, as animações ficam ligadas: neutralizar antes de medir
+     a largura esconderia a rolagem lateral. Sem isMobile, para a janela não se alargar até caber o conteúdo. */
+  projects: [
+    { name: 'desktop', use: { reducedMotion: 'reduce', viewport: { width: 1280, height: 900 } } },
+    { name: 'celular', use: { reducedMotion: 'no-preference', viewport: { width: 375, height: 812 } } },
+  ],
   webServer: [
     {
       command: 'node ../server/scripts/servidor-e2e.js',

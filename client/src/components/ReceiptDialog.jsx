@@ -13,6 +13,16 @@ function storedDate(value) {
   return m ? `${m[3]}/${m[2]}/${m[1]}` : '';
 }
 
+/* true quando a correção repete a leitura: mesma loja, mesmo dia gravado e mesmo total (em centavos) */
+function sameAsReading(receipt, values) {
+  const day = /^(\d{4}-\d{2}-\d{2})/.exec(String(receipt.purchase_date ?? ''))?.[1];
+  return (
+    values.store_name === String(receipt.store_name ?? '').trim() &&
+    values.purchase_date === day &&
+    Math.round(values.total_amount * 100) === Math.round(Number(receipt.total_amount || 0) * 100)
+  );
+}
+
 /* Valida os campos da correção; devolve { values } ou { errors } com mensagens em texto */
 function validate(form) {
   const errors = {};
@@ -134,8 +144,15 @@ export default function ReceiptDialog({ detail, onClose, onReview, onCorrect }) 
     setTimeout(() => fixButtonRef.current?.focus(), 0);
   }
 
-  /* Salva a correção; devolve a mensagem de erro, se houver, para o formulário mostrar */
+  /* Salva a correção; devolve a mensagem de erro, se houver, para o formulário mostrar.
+     Sem nenhuma mudança, não chama a API: a leitura não conta como corrigida (#45) */
   async function saveCorrection(values) {
+    if (sameAsReading(receipt, values)) {
+      setCorrecting(false);
+      setDoneMessage('Nada mudou. A leitura segue como estava.');
+      setTimeout(() => fixButtonRef.current?.focus(), 0);
+      return '';
+    }
     const message = await onCorrect(values);
     if (message) return message;
     setCorrecting(false);
@@ -145,6 +162,8 @@ export default function ReceiptDialog({ detail, onClose, onReview, onCorrect }) 
   }
 
   const { receipt, products } = detail;
+  /* A região role="status" fica sempre no DOM e só o texto muda: assim os leitores de tela anunciam (#45) */
+  const statusText = correcting ? '' : doneMessage || REVIEW_LABELS[receipt.review_status] || '';
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
       <div ref={boxRef} role="dialog" aria-modal="true" aria-labelledby="receipt-title" className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6">
@@ -165,15 +184,14 @@ export default function ReceiptDialog({ detail, onClose, onReview, onCorrect }) 
         )}
         <p className="mb-4 text-right font-bold">Total: {formatBRL(receipt.total_amount)}</p>
         <div className="mb-4 rounded-lg border border-gray-200 p-3">
+          <p role="status" className={statusText ? 'mb-2 text-sm text-gray-700' : 'sr-only'}>{statusText}</p>
           {correcting ? (
             <CorrectionForm receipt={receipt} onSave={saveCorrection} onCancel={cancelCorrection} />
-          ) : receipt.review_status ? (
-            <p role="status" className="text-sm text-gray-700">{doneMessage || REVIEW_LABELS[receipt.review_status]}</p>
-          ) : (
+          ) : receipt.review_status ? null : (
             <>
               <p className="mb-2 text-sm text-gray-900">A leitura da IA estava certa?</p>
               <div className="flex gap-2">
-                <button type="button" onClick={() => onReview('accepted')} className="flex-1 rounded-lg bg-green-700 py-2 text-sm text-white hover:bg-green-800">Sim, sem correção</button>
+                <button type="button" onClick={() => { setDoneMessage(''); onReview('accepted'); }} className="flex-1 rounded-lg bg-green-700 py-2 text-sm text-white hover:bg-green-800">Sim, sem correção</button>
                 <button ref={fixButtonRef} type="button" onClick={() => (onCorrect ? setCorrecting(true) : onReview('corrected'))} className="flex-1 rounded-lg border border-gray-400 py-2 text-sm text-gray-900 hover:bg-gray-100">Precisei corrigir</button>
               </div>
             </>
