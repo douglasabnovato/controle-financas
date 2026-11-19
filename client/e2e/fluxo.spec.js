@@ -19,11 +19,17 @@ async function semViolacoes(page, seletor) {
 
 /* Sem rolagem horizontal (#42): a página não fica mais larga que a janela. Vale nos dois projetos e pesa no celular */
 async function semRolagemLateral(page) {
-  const { largura, janela } = await page.evaluate(() => ({
-    largura: document.documentElement.scrollWidth,
-    janela: window.innerWidth,
-  }));
+  const { largura, janela, caixa } = await page.evaluate(() => {
+    /* O diálogo é fixed com overflow-y-auto: um transbordo dentro dele não aparece no scrollWidth da página */
+    const dialogo = document.querySelector('[role="dialog"]');
+    return {
+      largura: document.documentElement.scrollWidth,
+      janela: window.innerWidth,
+      caixa: dialogo ? [dialogo.scrollWidth, dialogo.clientWidth] : null,
+    };
+  });
   expect(largura, `scrollWidth ${largura} > innerWidth ${janela}`).toBeLessThanOrEqual(janela);
+  if (caixa) expect(caixa[0], `diálogo: scrollWidth ${caixa[0]} > clientWidth ${caixa[1]}`).toBeLessThanOrEqual(caixa[1]);
 }
 
 /* Aperta Tab até o alvo receber o foco (prova que ele é alcançável pelo teclado) */
