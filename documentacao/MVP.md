@@ -8,6 +8,13 @@
 
 **Finalizado:** sim — os 4 parciais dependem do responsável, cada um com issue `depende-do-responsavel`: 3 (republicar a API, #7), 5 (conta do GoatCounter, #35), 9 (tirar do ar a API antiga sem token, #47 e #7; os alertas do Dependabot foram ligados em 16/11/2026, #38) e 10 (Pages pelo Actions, #19)
 
+## Produto
+
+- **Problema:** catalogar os itens de um cupom fiscal à mão exige digitar tudo.
+- **Público:** quem controla gastos da casa ou de um negócio.
+- **Hipótese:** acreditamos que a leitura do cupom pela IA poupa a digitação. Saberemos quando, em 80% dos cupons enviados, a pessoa aceitar a leitura sem corrigir o total.
+- **Métrica:** parcela de leituras aceitas sem corrigir o total, medido pelo cartão "Leituras aceitas" do painel do app, depois que a API atual estiver no ar (#7, #9) — meta: 80%, decidida pelo coordenador em 10/11/2026 (D1), revisável pelo responsável (#22).
+
 ## Critérios em 16/11/2026 (ciclo de 16/11/2026)
 
 | # | Critério | Situação | Evidência (comando, data, resultado) ou o que falta | Issue |
@@ -47,6 +54,7 @@ Insights, variação de preços, múltiplos idiomas e correção item a item dos
 
 ## Histórico
 
+- 20/11/2026: bloco Produto padronizado, sem mudar critérios.
 - 18/11/2026, 21h16: evidências dos critérios 6, 8 e 11 trocadas pelo run 44427454310 (PR #51): `client` 34 de 34, `e2e` 4 passed com a largura de celular (#42), correção sem mudança e data sem fuso (#45). Resumo sem mudança (8 de 12). A #40 foi fechada como duplicada do critério 3 da #19; a #41 segue fora do MVP.
 - 16/11/2026, 12h29: critério 9 segue "Parcial" só pela API publicada com rotas sem token (#47, #7). A parte dos alertas trocou: antes a API respondia 403 (alertas desligados, engenharia#33); agora há 0 alertas abertos. Resumo sem mudança (8 de 12).
 
